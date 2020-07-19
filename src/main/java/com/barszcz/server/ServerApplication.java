@@ -1,7 +1,7 @@
 package com.barszcz.server;
 
-import com.barszcz.server.dao.BilionaireDao;
-import com.barszcz.server.entity.Bilionare;
+import com.barszcz.server.dao.ConfigurationDao;
+import com.barszcz.server.entity.ConfigurationModel;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,11 +15,16 @@ public class ServerApplication {
     }
 
     @Bean
-    public CommandLineRunner demo(BilionaireDao dao){
+    public CommandLineRunner demo(ConfigurationDao dao){
         return(args) ->{
-            Bilionare bilionare = new Bilionare();
-            bilionare.setName("bla1");
-            dao.save(bilionare);
+            ConfigurationModel configurationModel = new ConfigurationModel();
+            configurationModel.setIp("192.168.1.1");
+            configurationModel.setDeviceName("test");
+            configurationModel.setRed(111);
+            configurationModel.setGreen(222);
+            configurationModel.setBlue(333);
+            configurationModel.setDeviceState("state");
+            dao.save(configurationModel);
         };
     }
 }

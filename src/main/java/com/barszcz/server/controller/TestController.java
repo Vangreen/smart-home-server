@@ -1,14 +1,15 @@
 package com.barszcz.server.controller;
 
-import com.barszcz.server.dao.BilionaireDao;
-import com.barszcz.server.entity.Bilionare;
+import com.barszcz.server.dao.ConfigurationDao;
+import com.barszcz.server.entity.ConfigurationModel;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.lang.reflect.Executable;
+import java.util.Optional;
 
 
 @RestController
@@ -16,27 +17,53 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
 
-    private BilionaireDao bilionaireDao;
+    private ConfigurationDao configurationDao;
 
-
-
-//    @GetMapping(path = "/test")
-//    public String test() throws DataAccessException {
-////        return testString;
-////        return new ResponseEntity<>(dsl.select(USER.USERNAME).from(USER).fetchAny().into(String.class), HttpStatus.OK);
-//    }
 
     @GetMapping(path = "/find")
-    public String getTestString(){
-        return bilionaireDao.findAll().toString();
+    public String getAllDevices(){
+        return configurationDao.findAll().toString();
     }
 
+    @GetMapping(path = "/findByName")
+    public String getDeviceByName(@RequestParam String ip){
+        return configurationDao.findConfigurationModelByIpLike(ip). toString();
+    }
+
+    @PutMapping(path = "/changeLedState")
+    public void putLedState(@RequestParam String ip, int red, int green, int blue) throws Exception {
+         configurationDao.findConfigurationModelByIpLike(ip).map(configurationModel->{
+            configurationModel.setRed(red);
+            configurationModel.setGreen(green);
+            configurationModel.setBlue(blue);
+            return configurationDao.save(configurationModel);
+        }).orElseThrow(
+                Exception::new
+        );
+    }
+
+    @PutMapping(path = "/changeState")
+    public void putState(@RequestParam String ip, String state) throws Exception {
+        configurationDao.findConfigurationModelByIpLike(ip).map(configurationModel->{
+            configurationModel.setDeviceState(state);
+            return configurationDao.save(configurationModel);
+        }).orElseThrow(
+                Exception::new
+        );
+    }
+
+
     @GetMapping(path = "/add")
-    public String postTestString(@RequestParam String message){
-        Bilionare bilionare = new Bilionare();
-        bilionare.setName(message);
-        bilionaireDao.save(bilionare);
-        return  bilionaireDao.findAll().toString();
+    public String postTestString(@RequestParam String ip, String name, int red, int green, int blue, String state){
+        ConfigurationModel configurationModel = new ConfigurationModel();
+        configurationModel.setIp(ip);
+        configurationModel.setDeviceName(name);
+        configurationModel.setRed(red);
+        configurationModel.setGreen(green);
+        configurationModel.setBlue(blue);
+        configurationModel.setDeviceState(state);
+        configurationDao.save(configurationModel);
+        return  configurationDao.findAll().toString();
 
     }
 

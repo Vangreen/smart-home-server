@@ -1,4 +1,9 @@
-create table if not exists billionaires (
+create table if not exists configuration (
   id INT AUTO_INCREMENT  PRIMARY KEY,
-  first_name VARCHAR(250) NOT NULL
+  ip VARCHAR(250) NOT NULL,
+  device_name VARCHAR (250) not null,
+  red INT not null,
+  green INT not null,
+  blue INT not null,
+  state varchar (250) not null
 );
