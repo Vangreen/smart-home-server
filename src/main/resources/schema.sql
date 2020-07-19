@@ -5,5 +5,13 @@ create table if not exists configuration (
   red INT not null,
   green INT not null,
   blue INT not null,
-  state varchar (250) not null
+  state varchar (250) not null,
+  room varchar (250) not null,
+  device_type varchar (250) not null
 );
+
+create table if not exists users(
+id Int auto_increment primary key,
+login varchar (250) not null,
+password varchar (250) not null
+)

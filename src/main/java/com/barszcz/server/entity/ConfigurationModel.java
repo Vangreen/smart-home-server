@@ -5,14 +5,14 @@ import lombok.Data;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "configuration")
+@Table(name = "CONFIGURATION")
 @Data
 public class ConfigurationModel {
 
     @Id
-    @GeneratedValue
-    @Column(name = "ID", nullable = false)
-    Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", nullable = false)
+    int id;
 
 
     @Column(name = "ip", nullable = false)
@@ -32,4 +32,10 @@ public class ConfigurationModel {
 
     @Column(name = "state", nullable = false)
     String deviceState;
+
+    @Column(name = "room", nullable = false)
+    String room;
+
+    @Column(name = "device_type", nullable = false)
+    String deviceType;
 }

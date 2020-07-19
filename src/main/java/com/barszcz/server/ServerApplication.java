@@ -24,6 +24,8 @@ public class ServerApplication {
             configurationModel.setGreen(222);
             configurationModel.setBlue(333);
             configurationModel.setDeviceState("state");
+            configurationModel.setRoom("pawla");
+            configurationModel.setDeviceType("ledRGB");
             dao.save(configurationModel);
         };
     }

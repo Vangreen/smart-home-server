@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface ConfigurationDao extends CrudRepository<ConfigurationModel, Long> {
 
     public Optional<ConfigurationModel> findConfigurationModelByIpLike(String ip);
+    public List<ConfigurationModel> findConfigurationModelByRoomLike(String room);
 }
