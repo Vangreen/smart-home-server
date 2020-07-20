@@ -19,13 +19,13 @@ public class ServerApplication {
         return(args) ->{
             ConfigurationModel configurationModel = new ConfigurationModel();
             configurationModel.setIp("192.168.1.1");
-            configurationModel.setDeviceName("test");
+            configurationModel.setDeviceName("alpawla");
             configurationModel.setRed(111);
             configurationModel.setGreen(222);
             configurationModel.setBlue(333);
             configurationModel.setDeviceState("state");
             configurationModel.setRoom("pawla");
-            configurationModel.setDeviceType("ledRGB");
+            configurationModel.setDeviceType("ledrgb");
             dao.save(configurationModel);
         };
     }
