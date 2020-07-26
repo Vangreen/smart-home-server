@@ -19,5 +19,8 @@ public class UserModel {
 
     @Column(name = "password", nullable = false)
     String password;
+
+    @Column(name = "admin", nullable = false)
+    String admin;
 }
 

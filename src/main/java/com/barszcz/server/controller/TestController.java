@@ -1,13 +1,16 @@
 package com.barszcz.server.controller;
 
 import com.barszcz.server.dao.ConfigurationDao;
+import com.barszcz.server.dao.RoomsDao;
 import com.barszcz.server.dao.UserDao;
 import com.barszcz.server.entity.ConfigurationModel;
 import com.barszcz.server.entity.Respond;
+import com.barszcz.server.entity.RoomModel;
 import com.barszcz.server.entity.UserModel;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import javax.xml.xpath.XPath;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +22,7 @@ public class TestController {
 
     private ConfigurationDao configurationDao;
     private UserDao userDao;
+    private RoomsDao roomsDao;
 
     @GetMapping(path = "/find")
     public List<ConfigurationModel> getAllDevices(){
@@ -105,6 +109,7 @@ public class TestController {
             UserModel userModel = new UserModel();
             userModel.setLogin(login);
             userModel.setPassword(password);
+            userModel.setAdmin("notAdmin");
             userDao.save(userModel);
             respond.setRespond("registered");
             return respond;
@@ -113,4 +118,24 @@ public class TestController {
             return respond;
         }
     }
+
+    @GetMapping(path = "/roomsList")
+    public List<RoomModel> listRooms(){
+        return (List<RoomModel>) roomsDao.findAll();
+    }
+
+    @GetMapping(path = "/addRoom")
+    public String addRoom(@RequestParam String roomName){
+
+        if (roomsDao.findRoomModelByRoomLike(roomName)==null){
+            RoomModel roomModel = new RoomModel();
+            roomModel.setRoom(roomName);
+            roomsDao.save(roomModel);
+            return "done";
+        }else{
+            return "room exists";
+        }
+    }
+
+
 }
