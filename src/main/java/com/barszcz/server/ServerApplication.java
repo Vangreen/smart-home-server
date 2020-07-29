@@ -16,31 +16,31 @@ public class ServerApplication {
         SpringApplication.run(ServerApplication.class, args);
     }
 
-    @Bean
-    public CommandLineRunner demo(ConfigurationDao dao){
-        return(args) ->{
-            ConfigurationModel configurationModel = new ConfigurationModel();
-            configurationModel.setIp("192.168.1.1");
-            configurationModel.setDeviceName("alpawla");
-            configurationModel.setRed(111);
-            configurationModel.setGreen(222);
-            configurationModel.setBlue(333);
-            configurationModel.setDeviceState("state");
-            configurationModel.setRoom("pawla");
-            configurationModel.setDeviceType("ledrgb");
-            dao.save(configurationModel);
-        };
-    }
+//    @Bean
+//    public CommandLineRunner demo(ConfigurationDao dao){
+//        return(args) ->{
+//            ConfigurationModel configurationModel = new ConfigurationModel();
+//            configurationModel.setIp("192.168.1.2");
+//            configurationModel.setDeviceName("alpawla");
+//            configurationModel.setRed(111);
+//            configurationModel.setGreen(222);
+//            configurationModel.setBlue(333);
+//            configurationModel.setDeviceState("off");
+//            configurationModel.setRoom("pawla");
+//            configurationModel.setDeviceType("ledrgb");
+//            dao.save(configurationModel);
+//        };
+//    }
 
-    @Bean
-    public CommandLineRunner roomDemo(RoomsDao dao){
-        return (args) ->{
-            RoomModel roomModel = new RoomModel();
-            roomModel.setRoom("salon");
-            dao.save(roomModel);
-            RoomModel roomModel1 = new RoomModel();
-            roomModel1.setRoom("kuchnia");
-            dao.save(roomModel1);
-        };
-    }
+//    @Bean
+//    public CommandLineRunner roomDemo(RoomsDao dao){
+//        return (args) ->{
+//            RoomModel roomModel = new RoomModel();
+//            roomModel.setRoom("salon");
+//            dao.save(roomModel);
+//            RoomModel roomModel1 = new RoomModel();
+//            roomModel1.setRoom("kuchnia");
+//            dao.save(roomModel1);
+//        };
+//    }
 }

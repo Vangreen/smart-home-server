@@ -11,7 +11,7 @@ create table if not exists configuration (
 );
 
 create table if not exists users(
-id  identity,
+id Int auto_increment primary key,
 login varchar (250) not null,
 password varchar (250) not null,
 admin varchar (250) not null
@@ -20,4 +20,9 @@ admin varchar (250) not null
 create table if not exists rooms(
 id Int auto_increment primary key,
 room varchar (250) not null
+);
+
+create table if not exists deviceTypes(
+id Int auto_increment primary key,
+device_type varchar (250) not null
 );

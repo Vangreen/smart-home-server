@@ -1,15 +1,14 @@
 package com.barszcz.server.controller;
 
 import com.barszcz.server.dao.ConfigurationDao;
+import com.barszcz.server.dao.DeviceTypeDao;
 import com.barszcz.server.dao.RoomsDao;
 import com.barszcz.server.dao.UserDao;
-import com.barszcz.server.entity.ConfigurationModel;
-import com.barszcz.server.entity.Respond;
-import com.barszcz.server.entity.RoomModel;
-import com.barszcz.server.entity.UserModel;
+import com.barszcz.server.entity.*;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import javax.xml.xpath.XPath;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +22,7 @@ public class TestController {
     private ConfigurationDao configurationDao;
     private UserDao userDao;
     private RoomsDao roomsDao;
+    private DeviceTypeDao deviceTypeDao;
 
     @GetMapping(path = "/find")
     public List<ConfigurationModel> getAllDevices(){
@@ -125,17 +125,36 @@ public class TestController {
     }
 
     @GetMapping(path = "/addRoom")
-    public String addRoom(@RequestParam String roomName){
-
+    public Respond addRoom(@RequestParam String roomName){
+        Respond respond = new Respond();
         if (roomsDao.findRoomModelByRoomLike(roomName)==null){
             RoomModel roomModel = new RoomModel();
             roomModel.setRoom(roomName);
             roomsDao.save(roomModel);
-            return "done";
+            respond.setRespond("added");
+            return respond;
         }else{
-            return "room exists";
+            respond.setRespond("room exists");
+            return respond;
         }
     }
+    @DeleteMapping(path = "/deleteRoom")
+    public void deleteRoom(@RequestParam String roomName){
+        roomsDao.deleteRoomModelByRoomLike(roomName);
+    }
+
+    @GetMapping(path = "/findDeviceTypes")
+    public List<DeviceTypeModel> findDeviceTypes(){
+        return (List<DeviceTypeModel>) deviceTypeDao.findAll();
+    }
+
+    @GetMapping(path = "/addDeviceType")
+    public void addDeviceType(@RequestParam String deviceType){
+        DeviceTypeModel deviceTypeModel = new DeviceTypeModel();
+        deviceTypeModel.setDevice_type(deviceType);
+        deviceTypeDao.save(deviceTypeModel);
+    }
+
 
 
 }
