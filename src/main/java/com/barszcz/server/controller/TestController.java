@@ -1,19 +1,20 @@
 package com.barszcz.server.controller;
 
-import com.barszcz.server.dao.ConfigurationDao;
-import com.barszcz.server.dao.DeviceTypeDao;
-import com.barszcz.server.dao.RoomsDao;
-import com.barszcz.server.dao.UserDao;
+import ch.qos.logback.core.encoder.EchoEncoder;
+import com.barszcz.server.dao.*;
 import com.barszcz.server.entity.*;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.web.bind.annotation.*;
 
-import javax.transaction.Transactional;
-import javax.xml.xpath.XPath;
 import java.util.List;
 import java.util.Optional;
 
-
+@Slf4j
 @RestController
 @AllArgsConstructor
 public class TestController {
@@ -23,6 +24,7 @@ public class TestController {
     private UserDao userDao;
     private RoomsDao roomsDao;
     private DeviceTypeDao deviceTypeDao;
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     @GetMapping(path = "/find")
     public List<ConfigurationModel> getAllDevices(){
@@ -154,6 +156,15 @@ public class TestController {
         deviceTypeModel.setDevice_type(deviceType);
         deviceTypeDao.save(deviceTypeModel);
     }
+
+    @MessageMapping("/type")
+    @SendTo("/topic/test")
+    public Respond broadcastNews(String message) throws Exception{
+        Respond respond = new Respond();
+        respond.setRespond(message);
+        return respond;
+    }
+
 
 
 
