@@ -4,6 +4,7 @@ import com.barszcz.server.entity.ConfigurationModel;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,4 +13,9 @@ public interface ConfigurationDao extends CrudRepository<ConfigurationModel, Lon
 
     public Optional<ConfigurationModel> findConfigurationModelByIpLike(String ip);
     public List<ConfigurationModel> findConfigurationModelByRoomLike(String room);
+    @Transactional
+    public void deleteByDeviceNameLike(String name);
+
+    @Transactional void deleteByIpLike(String ip);
+
 }

@@ -14,4 +14,6 @@ public class Respond {
     @Id
     @Column(name = "respond")
     String respond;
+    @Column(name = "admin")
+    Boolean admin;
 }

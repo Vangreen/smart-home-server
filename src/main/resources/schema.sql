@@ -14,12 +14,14 @@ create table if not exists users(
 id Int auto_increment primary key,
 login varchar (250) not null,
 password varchar (250) not null,
-admin varchar (250) not null
+admin bit not null
 );
 
 create table if not exists rooms(
 id Int auto_increment primary key,
-room varchar (250) not null
+room varchar (250) not null,
+room_type varchar (250) not null,
+admin bit not null
 );
 
 create table if not exists deviceTypes(

@@ -7,18 +7,12 @@ import javax.persistence.*;
 @Entity
 @Table(name = "users")
 @Data
-public class UserModel {
+public class UserSettingsRespondModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    int id;
-
     @Column(name = "login", nullable = false)
     String login;
 
-    @Column(name = "password", nullable = false)
-    String password;
 
     @Column(name = "admin", nullable = false)
     Boolean admin;
