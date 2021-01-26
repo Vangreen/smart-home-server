@@ -1,13 +1,14 @@
 package com.barszcz.server;
 
-import com.barszcz.server.dao.ConfigurationDao;
-import com.barszcz.server.dao.RoomsDao;
-import com.barszcz.server.entity.ConfigurationModel;
-import com.barszcz.server.entity.RoomModel;
+import com.barszcz.server.dao.DeviceConfigurationDao;
+import com.barszcz.server.entity.DeviceConfigurationModel;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
 public class ServerApplication {
@@ -17,14 +18,15 @@ public class ServerApplication {
     }
 
 //    @Bean
-//    public CommandLineRunner demo(ConfigurationDao dao){
+//    public CommandLineRunner demo(DeviceConfigurationDao dao){
 //        return(args) ->{
-//            ConfigurationModel configurationModel = new ConfigurationModel();
-//            configurationModel.setIp("192.168.1.2");
-//            configurationModel.setDeviceName("alpawla");
-//            configurationModel.setRed(111);
-//            configurationModel.setGreen(222);
-//            configurationModel.setBlue(333);
+//            DeviceConfigurationModel configurationModel = new DeviceConfigurationModel();
+//            configurationModel.setSerial(123457);
+//            configurationModel.setIp("ws://192.168.2.145:81");
+//            configurationModel.setDeviceName("biurko");
+//            configurationModel.setHue(100);
+//            configurationModel.setSat(50);
+//            configurationModel.setBright(50);
 //            configurationModel.setDeviceState("off");
 //            configurationModel.setRoom("pawla");
 //            configurationModel.setDeviceType("ledrgb");
@@ -44,3 +46,4 @@ public class ServerApplication {
 //        };
 //    }
 }
+

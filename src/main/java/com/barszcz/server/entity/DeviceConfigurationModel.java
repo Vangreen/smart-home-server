@@ -7,12 +7,12 @@ import javax.persistence.*;
 @Entity
 @Table(name = "CONFIGURATION")
 @Data
-public class ConfigurationModel {
+public class DeviceConfigurationModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    int id;
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "serial", nullable = false)
+    int serial;
 
 
     @Column(name = "ip", nullable = false)
@@ -21,14 +21,14 @@ public class ConfigurationModel {
     @Column(name = "device_name", nullable = false)
     String deviceName;
 
-    @Column(name = "red", nullable = false)
-    int red;
+    @Column(name = "hue", nullable = false)
+    int hue;
 
-    @Column(name = "green", nullable = false)
-    int green;
+    @Column(name = "sat", nullable = false)
+    int sat;
 
-    @Column(name = "blue", nullable = false)
-    int blue;
+    @Column(name = "bright", nullable = false)
+    int bright;
 
     @Column(name = "state", nullable = false)
     String deviceState;
