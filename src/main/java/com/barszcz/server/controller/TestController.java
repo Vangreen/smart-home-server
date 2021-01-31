@@ -45,23 +45,7 @@ public class TestController {
     public void addDevice(@DestinationVariable("serial") int serial, @Payload String payload) {
         System.out.println(serial);
         System.out.println(payload);
-//        if(deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).isPresent()){
-//            simpMessagingTemplate.convertAndSend("/device/"+serial,deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial));
-//        }else{
-//            DeviceConfigurationModel deviceConfigurationModel = new DeviceConfigurationModel();
-//            deviceConfigurationModel.setSerial(serial);
-//            deviceConfigurationModel.setIp("ws://192.168.2.166:9999");
-//            deviceConfigurationModel.setDeviceName("test");
-//            deviceConfigurationModel.setHue(100);
-//            deviceConfigurationModel.setSat(50);
-//            deviceConfigurationModel.setBright(50);
-//            deviceConfigurationModel.setDeviceState("off");
-//            deviceConfigurationModel.setDeviceConnectionStatus("connected");
-//            deviceConfigurationModel.setRoom("pawla");
-//            deviceConfigurationModel.setDeviceType("ledrgb");
-//            deviceConfigurationDao.save(deviceConfigurationModel);
         simpMessagingTemplate.convertAndSend("/device/device/" + serial, payload);
-//            simpMessagingTemplate.convertAndSend("/device/newDevice",ip);
 //        }
     }
 
@@ -105,7 +89,7 @@ public class TestController {
         deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).map(deviceConfigurationModel -> {
             deviceConfigurationModel.setDeviceState(state);
             deviceConfigurationDao.save(deviceConfigurationModel);
-            simpMessagingTemplate.convertAndSend("/device/device/" + serial, stateChande(state));
+            simpMessagingTemplate.convertAndSend("/device/device/" + serial, stateChange(state));
             return true;
         }).orElseThrow(
                 Exception::new
@@ -113,10 +97,18 @@ public class TestController {
     }
 
     @GetMapping
-    public Map<String, String> stateChande(String state) {
+    public Map<String, String> stateChange(String state) {
         HashMap<String, String> map = new HashMap<>();
         map.put("task", "state change");
         map.put("state", state);
+        return map;
+    }
+
+    @GetMapping
+    public Map<String, String> colorChange(String state) {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("task", "color change");
+        map.put("hue", state);
         return map;
     }
 
