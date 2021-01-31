@@ -4,10 +4,18 @@ import com.barszcz.server.dao.*;
 import com.barszcz.server.entity.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -16,21 +24,100 @@ public class TestController {
 
 
     private DeviceConfigurationDao deviceConfigurationDao;
-//    private UserDao userDao;
+    //    private UserDao userDao;
 //    private UserSettingsRespondDao userSettingsRespondDao;
 //    private RoomsDao roomsDao;
 //    private DeviceTypeDao deviceTypeDao;
     private SimpMessagingTemplate simpMessagingTemplate;
 
     @GetMapping(path = "/getDevices")
-    public List<DeviceConfigurationModel> getAllDevices(){
+    public List<DeviceConfigurationModel> getAllDevices() {
         return (List<DeviceConfigurationModel>) deviceConfigurationDao.findAll();
     }
 
-    @PostMapping(path = "/init")
-    public String getDeviceInit(@RequestBody String body){
-        return body;
-//        return (DeviceConfigurationModel) deviceConfigurationDao.findAll();
+//    @PostMapping(path = "/init")
+//    public String getDeviceInit(@RequestBody String body){
+//        return body;
+////        return (DeviceConfigurationModel) deviceConfigurationDao.findAll();
+//    }
+
+    @MessageMapping("/initdevice/{serial}")
+    public void addDevice(@DestinationVariable("serial") int serial, @Payload String payload) {
+        System.out.println(serial);
+        System.out.println(payload);
+//        if(deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).isPresent()){
+//            simpMessagingTemplate.convertAndSend("/device/"+serial,deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial));
+//        }else{
+//            DeviceConfigurationModel deviceConfigurationModel = new DeviceConfigurationModel();
+//            deviceConfigurationModel.setSerial(serial);
+//            deviceConfigurationModel.setIp("ws://192.168.2.166:9999");
+//            deviceConfigurationModel.setDeviceName("test");
+//            deviceConfigurationModel.setHue(100);
+//            deviceConfigurationModel.setSat(50);
+//            deviceConfigurationModel.setBright(50);
+//            deviceConfigurationModel.setDeviceState("off");
+//            deviceConfigurationModel.setDeviceConnectionStatus("connected");
+//            deviceConfigurationModel.setRoom("pawla");
+//            deviceConfigurationModel.setDeviceType("ledrgb");
+//            deviceConfigurationDao.save(deviceConfigurationModel);
+        simpMessagingTemplate.convertAndSend("/device/device/" + serial, payload);
+//            simpMessagingTemplate.convertAndSend("/device/newDevice",ip);
+//        }
+    }
+
+    @SubscribeMapping("/device/{serial}")
+    public Object initDevice(@DestinationVariable("serial") int serial) {
+        System.out.println(serial);
+        if (deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).isPresent()) {
+//            simpMessagingTemplate.convertAndSend("/device/" + serial, deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial));
+            return deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial);
+        } else {
+            DeviceConfigurationModel deviceConfigurationModel = new DeviceConfigurationModel();
+            deviceConfigurationModel.setSerial(serial);
+            deviceConfigurationModel.setIp("http://192.168.2.166:9999/mywebsocket");
+            deviceConfigurationModel.setDeviceName("test");
+            deviceConfigurationModel.setHue(100);
+            deviceConfigurationModel.setSat(50);
+            deviceConfigurationModel.setBright(50);
+            deviceConfigurationModel.setDeviceState("off");
+            deviceConfigurationModel.setDeviceConnectionStatus("connected");
+            deviceConfigurationModel.setRoom("pawla");
+            deviceConfigurationModel.setDeviceType("ledrgb");
+            deviceConfigurationDao.save(deviceConfigurationModel);
+            return deviceConfigurationModel;
+//            simpMessagingTemplate.convertAndSend("/device/" + serial, deviceConfigurationModel);
+        }
+    }
+
+    @MessageMapping("/changeDeviceState/{serial}")
+    public void changeDeviceState(@DestinationVariable("serial") int serial, @Payload String payload) throws Exception {
+        System.out.println(serial);
+        System.out.println(payload);
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(payload);
+        } catch (JSONException err) {
+            System.out.println(err.toString());
+        }
+        System.out.println(jsonObject.get("state"));
+        String state = (String) jsonObject.get("state");
+
+        deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).map(deviceConfigurationModel -> {
+            deviceConfigurationModel.setDeviceState(state);
+            deviceConfigurationDao.save(deviceConfigurationModel);
+            simpMessagingTemplate.convertAndSend("/device/device/" + serial, stateChande(state));
+            return true;
+        }).orElseThrow(
+                Exception::new
+        );
+    }
+
+    @GetMapping
+    public Map<String, String> stateChande(String state) {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("task", "state change");
+        map.put("state", state);
+        return map;
     }
 
 //    @GetMapping(path = "/find")
@@ -305,8 +392,6 @@ public class TestController {
 //        );
 //
 //    }
-
-
 
 
 }

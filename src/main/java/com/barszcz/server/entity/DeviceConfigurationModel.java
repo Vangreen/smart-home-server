@@ -33,6 +33,9 @@ public class DeviceConfigurationModel {
     @Column(name = "state", nullable = false)
     String deviceState;
 
+    @Column(name = "status", nullable = false)
+    String deviceConnectionStatus;
+
     @Column(name = "room", nullable = false)
     String room;
 
