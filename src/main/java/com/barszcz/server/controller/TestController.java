@@ -2,10 +2,14 @@ package com.barszcz.server.controller;
 
 import com.barszcz.server.dao.*;
 import com.barszcz.server.entity.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.mapping.Any;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -29,6 +33,8 @@ public class TestController {
 //    private RoomsDao roomsDao;
 //    private DeviceTypeDao deviceTypeDao;
     private SimpMessagingTemplate simpMessagingTemplate;
+    @Autowired
+    private ObjectMapper mapper;
 
     @GetMapping(path = "/getDevices")
     public List<DeviceConfigurationModel> getAllDevices() {
@@ -61,9 +67,9 @@ public class TestController {
             deviceConfigurationModel.setIp("http://192.168.2.166:9999/mywebsocket");
             deviceConfigurationModel.setDeviceName("test");
             deviceConfigurationModel.setHue(100);
-            deviceConfigurationModel.setSat(50);
-            deviceConfigurationModel.setBright(50);
-            deviceConfigurationModel.setDeviceState("off");
+            deviceConfigurationModel.setSaturation(50);
+            deviceConfigurationModel.setBrightness(50);
+            deviceConfigurationModel.setDeviceStatus("off");
             deviceConfigurationModel.setDeviceConnectionStatus("connected");
             deviceConfigurationModel.setRoom("pawla");
             deviceConfigurationModel.setDeviceType("ledrgb");
@@ -73,8 +79,8 @@ public class TestController {
         }
     }
 
-    @MessageMapping("/changeDeviceState/{serial}")
-    public void changeDeviceState(@DestinationVariable("serial") int serial, @Payload String payload) throws Exception {
+    @MessageMapping("/changeDeviceStatus/{serial}")
+    public void changeDeviceStatus(@DestinationVariable("serial") int serial, @Payload String payload) throws Exception {
         System.out.println(serial);
         System.out.println(payload);
         JSONObject jsonObject = null;
@@ -83,34 +89,64 @@ public class TestController {
         } catch (JSONException err) {
             System.out.println(err.toString());
         }
-        System.out.println(jsonObject.get("state"));
-        String state = (String) jsonObject.get("state");
+        System.out.println(jsonObject.get("status"));
+        String status = (String) jsonObject.get("status");
 
         deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).map(deviceConfigurationModel -> {
-            deviceConfigurationModel.setDeviceState(state);
+            deviceConfigurationModel.setDeviceStatus(status);
             deviceConfigurationDao.save(deviceConfigurationModel);
-            simpMessagingTemplate.convertAndSend("/device/device/" + serial, stateChange(state));
+            simpMessagingTemplate.convertAndSend("/device/device/" + serial, statusChange(status));
             return true;
         }).orElseThrow(
                 Exception::new
         );
     }
 
-    @GetMapping
-    public Map<String, String> stateChange(String state) {
+    @MessageMapping("/changeDeviceColor/{serial}")
+    public void changeDeviceColor(@DestinationVariable("serial") int serial, @Payload String payload) throws Exception {
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(payload);
+        } catch (JSONException err) {
+            System.out.println(err.toString());
+        }
+
+        String status = (String) jsonObject.get("status");
+        int hue = (int) jsonObject.get("hue");
+        int sat = (int) jsonObject.get("saturation");
+        int bright = (int) jsonObject.get("brightness");
+
+        deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).map(deviceConfigurationModel -> {
+            deviceConfigurationModel.setDeviceStatus(status);
+            deviceConfigurationModel.setHue(hue);
+            deviceConfigurationModel.setSaturation(sat);
+            deviceConfigurationModel.setBrightness(bright);
+            deviceConfigurationDao.save(deviceConfigurationModel);
+            simpMessagingTemplate.convertAndSend("/device/device/" + serial, colorChange(status, hue, bright, sat));
+            return true;
+        }).orElseThrow(
+                Exception::new
+        );
+    }
+
+    public HashMap<String, String> statusChange(String status) {
         HashMap<String, String> map = new HashMap<>();
-        map.put("task", "state change");
-        map.put("state", state);
+        map.put("task", "status change");
+        map.put("status", status);
         return map;
     }
 
-    @GetMapping
-    public Map<String, String> colorChange(String state) {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("task", "color change");
-        map.put("hue", state);
-        return map;
+    public ObjectNode colorChange(String status, int hue, int bright, int sat) {
+        ObjectNode objectNode = mapper.createObjectNode();
+        objectNode.put("task", "color change");
+        objectNode.put("status", status);
+        objectNode.put("hue", hue);
+        objectNode.put("brightness", bright);
+        objectNode.put("saturation", sat);
+        return objectNode;
     }
+
+
 
 //    @GetMapping(path = "/find")
 //    public List<DeviceConfigurationModel> getAllDevices(){

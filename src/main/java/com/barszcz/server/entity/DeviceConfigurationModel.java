@@ -25,13 +25,13 @@ public class DeviceConfigurationModel {
     int hue;
 
     @Column(name = "sat", nullable = false)
-    int sat;
+    int saturation;
 
     @Column(name = "bright", nullable = false)
-    int bright;
+    int brightness;
 
     @Column(name = "state", nullable = false)
-    String deviceState;
+    String deviceStatus;
 
     @Column(name = "status", nullable = false)
     String deviceConnectionStatus;
