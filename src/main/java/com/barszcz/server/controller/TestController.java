@@ -56,9 +56,8 @@ public class TestController {
         }
     }
 
-    // Tylko aby ustawic false added dla danego urzadzenia
-    @GetMapping("admin/{serial}")
-    public void adminEndpoint(@PathVariable("serial") int serial) {
+    @GetMapping("unsetAdded/{serial}")
+    public void unsetAdded(@PathVariable("serial") int serial) {
         System.out.println("SERIALL");
         System.out.println(serial);
         Optional<DeviceConfigurationModel> device = deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial);
