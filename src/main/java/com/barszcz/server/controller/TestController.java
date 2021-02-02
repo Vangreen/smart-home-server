@@ -1,12 +1,11 @@
 package com.barszcz.server.controller;
 
-import com.barszcz.server.dao.*;
-import com.barszcz.server.entity.*;
+import com.barszcz.server.dao.DeviceConfigurationDao;
+import com.barszcz.server.entity.DeviceConfigurationModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.mapping.Any;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +14,13 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -41,6 +42,35 @@ public class TestController {
         return (List<DeviceConfigurationModel>) deviceConfigurationDao.findAll();
     }
 
+    @GetMapping("added/{serial}")
+    public void setAdded(@PathVariable("serial") int serial) {
+        System.out.println("SERIALL");
+        System.out.println(serial);
+        Optional<DeviceConfigurationModel> device = deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial);
+        if (device.isPresent()) {
+            device.get().setAdded(true);
+            deviceConfigurationDao.save(device.get());
+        } else {
+            //TODO napsiac exception
+            System.out.println("serial not found");
+        }
+    }
+
+    // Tylko aby ustawic false added dla danego urzadzenia
+    @GetMapping("admin/{serial}")
+    public void adminEndpoint(@PathVariable("serial") int serial) {
+        System.out.println("SERIALL");
+        System.out.println(serial);
+        Optional<DeviceConfigurationModel> device = deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial);
+        if (device.isPresent()) {
+            device.get().setAdded(false);
+            deviceConfigurationDao.save(device.get());
+        } else {
+            //TODO napsiac exception
+            System.out.println("serial not found");
+        }
+    }
+
 //    @PostMapping(path = "/init")
 //    public String getDeviceInit(@RequestBody String body){
 //        return body;
@@ -49,7 +79,7 @@ public class TestController {
 
     @MessageMapping("/initdevice/{serial}")
     public void addDevice(@DestinationVariable("serial") int serial, @Payload String payload) {
-        System.out.println(serial);
+        System.out.println("message" + serial);
         System.out.println(payload);
         simpMessagingTemplate.convertAndSend("/device/device/" + serial, payload);
 //        }
@@ -57,14 +87,15 @@ public class TestController {
 
     @SubscribeMapping("/device/{serial}")
     public Object initDevice(@DestinationVariable("serial") int serial) {
-        System.out.println(serial);
+        System.out.println("subs" + serial);
         if (deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).isPresent()) {
 //            simpMessagingTemplate.convertAndSend("/device/" + serial, deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial));
             return deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial);
         } else {
+            System.out.println("else");
             DeviceConfigurationModel deviceConfigurationModel = new DeviceConfigurationModel();
             deviceConfigurationModel.setSerial(serial);
-            deviceConfigurationModel.setIp("http://192.168.2.166:9999/mywebsocket");
+            deviceConfigurationModel.setIp("http://192.168.0.16:9999/mywebsocket");
             deviceConfigurationModel.setDeviceName("test");
             deviceConfigurationModel.setHue(100);
             deviceConfigurationModel.setSaturation(50);
@@ -73,6 +104,7 @@ public class TestController {
             deviceConfigurationModel.setDeviceConnectionStatus("connected");
             deviceConfigurationModel.setRoom("pawla");
             deviceConfigurationModel.setDeviceType("ledrgb");
+            deviceConfigurationModel.setAdded(false);
             deviceConfigurationDao.save(deviceConfigurationModel);
             return deviceConfigurationModel;
 //            simpMessagingTemplate.convertAndSend("/device/" + serial, deviceConfigurationModel);
@@ -145,7 +177,6 @@ public class TestController {
         objectNode.put("saturation", sat);
         return objectNode;
     }
-
 
 
 //    @GetMapping(path = "/find")

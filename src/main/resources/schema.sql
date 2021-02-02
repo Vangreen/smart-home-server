@@ -8,8 +8,11 @@ create table if not exists configuration (
   state varchar (250) not null,
   status varchar (250) not null,
   room varchar (250) not null,
-  device_type varchar (250) not null
+  device_type varchar (250) not null,
+  added varchar (250) not null
 );
+
+-- drop  table configuration;
 --
 -- create table if not exists users(
 -- id Int auto_increment primary key,

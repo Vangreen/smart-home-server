@@ -41,4 +41,7 @@ public class DeviceConfigurationModel {
 
     @Column(name = "device_type", nullable = false)
     String deviceType;
+
+    @Column(name = "added", nullable = false)
+    boolean added;
 }
