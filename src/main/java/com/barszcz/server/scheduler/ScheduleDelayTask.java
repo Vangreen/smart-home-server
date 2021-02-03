@@ -34,10 +34,13 @@ public class ScheduleDelayTask {
         Runnable task = new Runnable() {
             public void run() {
                 System.out.println("run");
-                unassignedDeviceDao.findAllBySerialLike(serial).ifPresent(device ->
-                        unassignedDeviceDao.deleteBySerialLike(device.getSerial())
+                unassignedDeviceDao.findAllBySerialLike(serial).ifPresent(device -> {
+                            System.out.println("wykonano");
+                            unassignedDeviceDao.deleteBySerialLike(device.getSerial());
+                            simpMessagingTemplate.convertAndSend("/device/device/" + serial, responseObject("doesnt exists"));
+                        }
                 );
-                simpMessagingTemplate.convertAndSend("/device/device/" + serial, responseObject("doesnt exists"));
+
             }
         };
         delay5minutes(task);
