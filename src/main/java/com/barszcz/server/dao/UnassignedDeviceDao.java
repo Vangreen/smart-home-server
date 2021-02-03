@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface UnassignedDeviceDao extends CrudRepository<UnassignedDeviceModel, Long> {
 
     @Transactional
-    public void deleteBySerialLike(int serial);
+    void deleteBySerialLike(int serial);
 
     @Transactional
     Optional<UnassignedDeviceModel> findAllBySerialLike(int serial);
