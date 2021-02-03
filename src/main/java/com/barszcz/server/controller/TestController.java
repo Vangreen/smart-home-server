@@ -4,6 +4,7 @@ import com.barszcz.server.dao.DeviceConfigurationDao;
 import com.barszcz.server.dao.UnassignedDeviceDao;
 import com.barszcz.server.entity.DeviceConfigurationModel;
 import com.barszcz.server.entity.UnassignedDeviceModel;
+import com.barszcz.server.scheduler.ScheduleDelayTask;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.AllArgsConstructor;
@@ -27,7 +28,6 @@ import java.util.Optional;
 @AllArgsConstructor
 public class TestController {
 
-
     private DeviceConfigurationDao deviceConfigurationDao;
     private UnassignedDeviceDao unassignedDeviceDao;
     //    private UserDao userDao;
@@ -35,6 +35,7 @@ public class TestController {
 //    private RoomsDao roomsDao;
 //    private DeviceTypeDao deviceTypeDao;
     private SimpMessagingTemplate simpMessagingTemplate;
+    private ScheduleDelayTask scheduleDelayTask;
 
     @Autowired
     private ObjectMapper mapper;
@@ -122,7 +123,6 @@ public class TestController {
     }
 
 
-
     @SubscribeMapping("/device/{serial}")
     public Object initDevice(@DestinationVariable("serial") int serial) {
         System.out.println("subs" + serial);
@@ -148,6 +148,7 @@ public class TestController {
         unassignedDeviceModel.setDeviceType(deviceType);
         unassignedDeviceDao.save(unassignedDeviceModel);
         simpMessagingTemplate.convertAndSend("/device/unassignedDevices", unassignedDeviceDao.findAll());
+        scheduleDelayTask.deleteUnassignedDevices(serial);
     }
 
     @MessageMapping("/changeDeviceStatus/{serial}")

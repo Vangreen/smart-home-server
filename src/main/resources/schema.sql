@@ -15,6 +15,8 @@ create table if not exists unassignedDevices (
   device_type varchar (250) not null
     );
 
+-- drop table configuration;
+-- drop table unassignedDevices;
 
 -- drop  table configuration;
 --
