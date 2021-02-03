@@ -10,13 +10,8 @@ import javax.persistence.*;
 public class DeviceConfigurationModel {
 
     @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "serial", nullable = false)
     int serial;
-
-
-    @Column(name = "ip", nullable = false)
-    String ip;
 
     @Column(name = "device_name", nullable = false)
     String deviceName;
@@ -42,6 +37,4 @@ public class DeviceConfigurationModel {
     @Column(name = "device_type", nullable = false)
     String deviceType;
 
-    @Column(name = "added", nullable = false)
-    boolean added;
 }

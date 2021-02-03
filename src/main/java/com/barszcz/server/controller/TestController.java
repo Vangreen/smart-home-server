@@ -1,7 +1,9 @@
 package com.barszcz.server.controller;
 
 import com.barszcz.server.dao.DeviceConfigurationDao;
+import com.barszcz.server.dao.UnassignedDeviceDao;
 import com.barszcz.server.entity.DeviceConfigurationModel;
+import com.barszcz.server.entity.UnassignedDeviceModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.AllArgsConstructor;
@@ -14,9 +16,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,11 +29,13 @@ public class TestController {
 
 
     private DeviceConfigurationDao deviceConfigurationDao;
+    private UnassignedDeviceDao unassignedDeviceDao;
     //    private UserDao userDao;
 //    private UserSettingsRespondDao userSettingsRespondDao;
 //    private RoomsDao roomsDao;
 //    private DeviceTypeDao deviceTypeDao;
     private SimpMessagingTemplate simpMessagingTemplate;
+
     @Autowired
     private ObjectMapper mapper;
 
@@ -42,13 +44,62 @@ public class TestController {
         return (List<DeviceConfigurationModel>) deviceConfigurationDao.findAll();
     }
 
+    @GetMapping(path = "/getUnassignedDevices")
+    public List<UnassignedDeviceModel> getUnassignedDevices() {
+        return (List<UnassignedDeviceModel>) unassignedDeviceDao.findAll();
+    }
+
+    @SubscribeMapping("/unassignedDevices")
+    public List<UnassignedDeviceModel> initDevice() {
+        return (List<UnassignedDeviceModel>) unassignedDeviceDao.findAll();
+    }
+
+
+    @PostMapping(path = "/addDevice")
+    public void addDevice(@RequestBody String body) throws JSONException {
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(body);
+        } catch (JSONException err) {
+            System.out.println(err.toString());
+        }
+        int serial = (int) jsonObject.get("serial");
+        DeviceConfigurationModel deviceConfigurationModel = new DeviceConfigurationModel();
+        deviceConfigurationModel.setSerial(serial);
+        deviceConfigurationModel.setDeviceName((String) jsonObject.get("deviceName"));
+        deviceConfigurationModel.setRoom((String) jsonObject.get("room"));
+        deviceConfigurationModel.setDeviceType((String) jsonObject.get("deviceType"));
+        deviceConfigurationModel.setDeviceConnectionStatus("connected");
+        deviceConfigurationModel.setHue(0);
+        deviceConfigurationModel.setSaturation(0);
+        deviceConfigurationModel.setBrightness(100);
+        deviceConfigurationModel.setDeviceStatus("On");
+        deviceConfigurationDao.save(deviceConfigurationModel);
+        unassignedDeviceDao.deleteBySerialLike(serial);
+        simpMessagingTemplate.convertAndSend("/device/device/" + serial, deviceConfigurationModel);
+    }
+
+    @PostMapping(path = "/deleteDevice")
+    public void deleteDevice(@RequestBody String body) throws JSONException {
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(body);
+        } catch (JSONException err) {
+            System.out.println(err.toString());
+        }
+        int serial = (int) jsonObject.get("serial");
+        deviceConfigurationDao.deleteBySerialLike(serial);
+        simpMessagingTemplate.convertAndSend("/device/device/" + serial, responseObject("doesnt exists"));
+    }
+
+
     @GetMapping("added/{serial}")
     public void setAdded(@PathVariable("serial") int serial) {
         System.out.println("SERIALL");
         System.out.println(serial);
         Optional<DeviceConfigurationModel> device = deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial);
         if (device.isPresent()) {
-            device.get().setAdded(true);
+//            device.get().setAdded(true);
             deviceConfigurationDao.save(device.get());
         } else {
             //TODO napsiac exception
@@ -62,7 +113,7 @@ public class TestController {
         System.out.println(serial);
         Optional<DeviceConfigurationModel> device = deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial);
         if (device.isPresent()) {
-            device.get().setAdded(false);
+//            device.get().setAdded(false);
             deviceConfigurationDao.save(device.get());
         } else {
             //TODO napsiac exception
@@ -70,44 +121,33 @@ public class TestController {
         }
     }
 
-//    @PostMapping(path = "/init")
-//    public String getDeviceInit(@RequestBody String body){
-//        return body;
-////        return (DeviceConfigurationModel) deviceConfigurationDao.findAll();
-//    }
 
-    @MessageMapping("/initdevice/{serial}")
-    public void addDevice(@DestinationVariable("serial") int serial, @Payload String payload) {
-        System.out.println("message" + serial);
-        System.out.println(payload);
-        simpMessagingTemplate.convertAndSend("/device/device/" + serial, payload);
-//        }
-    }
 
     @SubscribeMapping("/device/{serial}")
     public Object initDevice(@DestinationVariable("serial") int serial) {
         System.out.println("subs" + serial);
         if (deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).isPresent()) {
-//            simpMessagingTemplate.convertAndSend("/device/" + serial, deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial));
             return deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial);
         } else {
-            System.out.println("else");
-            DeviceConfigurationModel deviceConfigurationModel = new DeviceConfigurationModel();
-            deviceConfigurationModel.setSerial(serial);
-            deviceConfigurationModel.setIp("http://192.168.0.16:9999/mywebsocket");
-            deviceConfigurationModel.setDeviceName("test");
-            deviceConfigurationModel.setHue(100);
-            deviceConfigurationModel.setSaturation(50);
-            deviceConfigurationModel.setBrightness(50);
-            deviceConfigurationModel.setDeviceStatus("off");
-            deviceConfigurationModel.setDeviceConnectionStatus("connected");
-            deviceConfigurationModel.setRoom("pawla");
-            deviceConfigurationModel.setDeviceType("ledrgb");
-            deviceConfigurationModel.setAdded(false);
-            deviceConfigurationDao.save(deviceConfigurationModel);
-            return deviceConfigurationModel;
-//            simpMessagingTemplate.convertAndSend("/device/" + serial, deviceConfigurationModel);
+            return responseObject("doesnt exists");
         }
+    }
+
+    @MessageMapping("/doesntExists")
+    public void doesntExists(@Payload String payload) throws JSONException {
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(payload);
+        } catch (JSONException err) {
+            System.out.println(err.toString());
+        }
+        int serial = (int) jsonObject.get("serial");
+        String deviceType = (String) jsonObject.get("deviceType");
+        UnassignedDeviceModel unassignedDeviceModel = new UnassignedDeviceModel();
+        unassignedDeviceModel.setSerial(serial);
+        unassignedDeviceModel.setDeviceType(deviceType);
+        unassignedDeviceDao.save(unassignedDeviceModel);
+        simpMessagingTemplate.convertAndSend("/device/unassignedDevices", unassignedDeviceDao.findAll());
     }
 
     @MessageMapping("/changeDeviceStatus/{serial}")
@@ -174,6 +214,12 @@ public class TestController {
         objectNode.put("hue", hue);
         objectNode.put("brightness", bright);
         objectNode.put("saturation", sat);
+        return objectNode;
+    }
+
+    public ObjectNode responseObject(String response) {
+        ObjectNode objectNode = mapper.createObjectNode();
+        objectNode.put("response", response);
         return objectNode;
     }
 

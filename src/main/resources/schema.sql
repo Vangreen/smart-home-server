@@ -1,6 +1,5 @@
 create table if not exists configuration (
-  serial INT AUTO_INCREMENT  PRIMARY KEY,
-  ip VARCHAR(250) NOT NULL,
+  serial INT PRIMARY KEY,
   device_name VARCHAR (250) not null,
   hue INT not null,
   sat INT not null,
@@ -8,9 +7,14 @@ create table if not exists configuration (
   state varchar (250) not null,
   status varchar (250) not null,
   room varchar (250) not null,
-  device_type varchar (250) not null,
-  added varchar (250) not null
+  device_type varchar (250) not null
 );
+
+create table if not exists unassignedDevices (
+  serial INT PRIMARY KEY,
+  device_type varchar (250) not null
+    );
+
 
 -- drop  table configuration;
 --

@@ -11,13 +11,11 @@ import java.util.Optional;
 @Repository
 public interface DeviceConfigurationDao extends CrudRepository<DeviceConfigurationModel, Long> {
 
-    public Optional<DeviceConfigurationModel> findDeviceConfigurationModelByIpLike(String ip);
     public Optional<DeviceConfigurationModel> findDeviceConfigurationModelBySerialLike(int serial);
 
     public List<DeviceConfigurationModel> findConfigurationModelByRoomLike(String room);
     @Transactional
-    public void deleteByDeviceNameLike(String name);
+    public void deleteBySerialLike(int serial);
 
-    @Transactional void deleteByIpLike(String ip);
 
 }
