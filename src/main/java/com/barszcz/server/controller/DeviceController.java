@@ -41,8 +41,8 @@ public class DeviceController {
     private ObjectMapper mapper;
 
     @GetMapping(path = "/getDevices")
-    public List<DeviceConfigurationModel> getAllDevices() {
-        return (List<DeviceConfigurationModel>) deviceConfigurationDao.findAll();
+    public List<DeviceConfigurationModel> getAllDevices(@RequestParam String room) {
+        return (List<DeviceConfigurationModel>) deviceConfigurationDao.findDeviceConfigurationModelByRoomLike(room);
     }
 
     @SubscribeMapping("/unassignedDevices")
