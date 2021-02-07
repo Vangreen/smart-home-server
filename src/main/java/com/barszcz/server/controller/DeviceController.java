@@ -26,7 +26,7 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @AllArgsConstructor
-public class TestController {
+public class DeviceController {
 
     private DeviceConfigurationDao deviceConfigurationDao;
     private UnassignedDeviceDao unassignedDeviceDao;
@@ -45,16 +45,10 @@ public class TestController {
         return (List<DeviceConfigurationModel>) deviceConfigurationDao.findAll();
     }
 
-    @GetMapping(path = "/getUnassignedDevices")
-    public List<UnassignedDeviceModel> getUnassignedDevices() {
-        return (List<UnassignedDeviceModel>) unassignedDeviceDao.findAll();
-    }
-
     @SubscribeMapping("/unassignedDevices")
     public List<UnassignedDeviceModel> initDevice() {
         return (List<UnassignedDeviceModel>) unassignedDeviceDao.findAll();
     }
-
 
     @PostMapping(path = "/addDevice")
     public void addDevice(@RequestBody String body) throws JSONException {
@@ -78,6 +72,7 @@ public class TestController {
         deviceConfigurationDao.save(deviceConfigurationModel);
         unassignedDeviceDao.deleteBySerialLike(serial);
         simpMessagingTemplate.convertAndSend("/device/device/" + serial, deviceConfigurationModel);
+        System.out.println("added device with serial:" + serial);
     }
 
     @PostMapping(path = "/deleteDevice")
@@ -90,42 +85,13 @@ public class TestController {
         }
         int serial = (int) jsonObject.get("serial");
         deviceConfigurationDao.deleteBySerialLike(serial);
+        System.out.println("deleted device with serial:" + serial);
         simpMessagingTemplate.convertAndSend("/device/device/" + serial, responseObject("doesnt exists"));
     }
 
-
-    @GetMapping("added/{serial}")
-    public void setAdded(@PathVariable("serial") int serial) {
-        System.out.println("SERIALL");
-        System.out.println(serial);
-        Optional<DeviceConfigurationModel> device = deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial);
-        if (device.isPresent()) {
-//            device.get().setAdded(true);
-            deviceConfigurationDao.save(device.get());
-        } else {
-            //TODO napsiac exception
-            System.out.println("serial not found");
-        }
-    }
-
-    @GetMapping("unsetAdded/{serial}")
-    public void unsetAdded(@PathVariable("serial") int serial) {
-        System.out.println("SERIALL");
-        System.out.println(serial);
-        Optional<DeviceConfigurationModel> device = deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial);
-        if (device.isPresent()) {
-//            device.get().setAdded(false);
-            deviceConfigurationDao.save(device.get());
-        } else {
-            //TODO napsiac exception
-            System.out.println("serial not found");
-        }
-    }
-
-
     @SubscribeMapping("/device/{serial}")
     public Object initDevice(@DestinationVariable("serial") int serial) {
-        System.out.println("subs" + serial);
+        System.out.println("new device subscribed for serial:" + serial);
         if (deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).isPresent()) {
             return deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial);
         } else {
@@ -135,6 +101,7 @@ public class TestController {
 
     @MessageMapping("/doesntExists")
     public void doesntExists(@Payload String payload) throws JSONException {
+
         JSONObject jsonObject = null;
         try {
             jsonObject = new JSONObject(payload);
@@ -149,21 +116,19 @@ public class TestController {
         unassignedDeviceDao.save(unassignedDeviceModel);
         simpMessagingTemplate.convertAndSend("/device/unassignedDevices", unassignedDeviceDao.findAll());
         scheduleDelayTask.deleteUnassignedDevices(serial);
+        System.out.println("new unassigned device with serial:" + serial);
     }
 
     @MessageMapping("/changeDeviceStatus/{serial}")
     public void changeDeviceStatus(@DestinationVariable("serial") int serial, @Payload String payload) throws Exception {
-        System.out.println(serial);
-        System.out.println(payload);
         JSONObject jsonObject = null;
         try {
             jsonObject = new JSONObject(payload);
         } catch (JSONException err) {
             System.out.println(err.toString());
         }
-        System.out.println(jsonObject.get("status"));
         String status = (String) jsonObject.get("status");
-
+        System.out.println("state change for device:" + serial);
         deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).map(deviceConfigurationModel -> {
             deviceConfigurationModel.setDeviceStatus(status);
             deviceConfigurationDao.save(deviceConfigurationModel);
@@ -187,6 +152,7 @@ public class TestController {
         int hue = (int) jsonObject.get("hue");
         int sat = (int) jsonObject.get("saturation");
         int bright = (int) jsonObject.get("brightness");
+        System.out.println("color change for device:" + serial);
 
         deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).map(deviceConfigurationModel -> {
             deviceConfigurationModel.setDeviceStatus(status);
