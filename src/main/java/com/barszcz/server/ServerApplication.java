@@ -29,16 +29,5 @@ public class ServerApplication {
 //        };
 //    }
 
-//    @Bean
-//    public CommandLineRunner roomDemo(RoomsDao dao){
-//        return (args) ->{
-//            RoomModel roomModel = new RoomModel();
-//            roomModel.setRoom("salon");
-//            dao.save(roomModel);
-//            RoomModel roomModel1 = new RoomModel();
-//            roomModel1.setRoom("kuchnia");
-//            dao.save(roomModel1);
-//        };
-//    }
 }
 
