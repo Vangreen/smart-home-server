@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.web.bind.annotation.*;
@@ -58,6 +57,27 @@ public class RoomController {
         simpMessagingTemplate.convertAndSend("/rooms/rooms", roomConfigurationDao.findAll());
     }
 
+    @PostMapping(path = "/renameRoom")
+    public void editNameRoom(@RequestBody String body) throws Exception {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject = new JSONObject(body);
+        } catch (JSONException err) {
+            System.out.println(err.toString());
+        }
+        int id = (int) jsonObject.get("id");
+        String name = (String) jsonObject.get("name");
+        roomConfigurationDao.findRoomConfigurationModelByIdLike(id).map(deviceConfigurationModel -> {
+                    deviceConfigurationModel.setRoomName(name);
+                    return roomConfigurationDao.save(deviceConfigurationModel);
+                }
+        ).orElseThrow(
+                Exception::new
+        );
+        System.out.println("Rename room with id:" + id);
+        simpMessagingTemplate.convertAndSend("/rooms/rooms", roomConfigurationDao.findAll());
+    }
+
     public ObjectNode colorChange(String status, int hue, int bright, int sat) {
         ObjectNode objectNode = mapper.createObjectNode();
         objectNode.put("task", "color change");
@@ -73,6 +93,7 @@ public class RoomController {
         objectNode.put("response", response);
         return objectNode;
     }
+
     public ObjectNode roomResponse() {
         ObjectNode objectNode = mapper.createObjectNode();
         objectNode.put("main", roomConfigurationDao.findRoomConfigurationModelByMainLike("yes").toString());

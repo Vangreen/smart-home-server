@@ -1,7 +1,6 @@
 package com.barszcz.server.dao;
 
 import com.barszcz.server.entity.RoomConfigurationModel;
-import com.barszcz.server.entity.UnassignedDeviceModel;
 import org.springframework.data.repository.CrudRepository;
 
 import javax.transaction.Transactional;
@@ -12,7 +11,10 @@ public interface RoomConfigurationDao extends CrudRepository<RoomConfigurationMo
 
     RoomConfigurationModel findRoomConfigurationModelByMainLike(String main);
 
+    Optional<RoomConfigurationModel> findRoomConfigurationModelByIdLike(int id);
+
     List<RoomConfigurationModel> findRoomConfigurationModelsByMainLike(String main);
+
     @Transactional
     void deleteRoomConfigurationModelByIdLike(int id);
 
