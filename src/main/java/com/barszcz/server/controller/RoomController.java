@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.web.bind.annotation.*;
@@ -50,16 +51,8 @@ public class RoomController {
         simpMessagingTemplate.convertAndSend("/rooms/rooms", roomConfigurationDao.findAll());
     }
 
-    @PostMapping(path = "/deleteRoom")
-    public void deleteDevice(@RequestBody String body) throws JSONException {
-        JSONObject jsonObject = null;
-        try {
-            jsonObject = new JSONObject(body);
-        } catch (JSONException err) {
-            System.out.println(err.toString());
-        }
-        assert jsonObject != null;
-        int id = (int) jsonObject.get("id");
+    @DeleteMapping(path = "/deleteRoom/{id}")
+    public void deleteDevice(@PathVariable("id") int id) {
         roomConfigurationDao.deleteRoomConfigurationModelByIdLike(id);
         System.out.println("deleted room with id:" + id);
         simpMessagingTemplate.convertAndSend("/rooms/rooms", roomConfigurationDao.findAll());
