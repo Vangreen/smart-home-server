@@ -2,6 +2,7 @@ package com.barszcz.server.controller;
 
 import com.barszcz.server.dao.DeviceConfigurationDao;
 import com.barszcz.server.dao.RoomConfigurationDao;
+import com.barszcz.server.entity.DeviceConfigurationModel;
 import com.barszcz.server.entity.RoomConfigurationModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -14,6 +15,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -54,6 +56,7 @@ public class RoomController {
     public void deleteDevice(@PathVariable("id") int id) {
         roomConfigurationDao.deleteRoomConfigurationModelByIdLike(id);
         System.out.println("deleted room with id:" + id);
+        deleteDevicesFromRoom(id);
         simpMessagingTemplate.convertAndSend("/rooms/rooms", roomConfigurationDao.findAll());
     }
 
@@ -78,26 +81,27 @@ public class RoomController {
         simpMessagingTemplate.convertAndSend("/rooms/rooms", roomConfigurationDao.findAll());
     }
 
-    public ObjectNode colorChange(String status, int hue, int bright, int sat) {
+    private void deleteDevicesFromRoom(int roomID){
+        List<DeviceConfigurationModel> devices = new ArrayList<DeviceConfigurationModel>();
+        devices = deviceConfigurationDao.findDeviceConfigurationModelsByRoomIDLike(roomID);
+        devices.forEach(device ->{
+            int serial = device.getSerial();
+            deviceConfigurationDao.deleteBySerialLike(serial);
+            System.out.println("deleted device with serial:" + serial);
+            simpMessagingTemplate.convertAndSend("/device/device/" + serial, responseObject("doesnt exists"));
+        });
+    }
+
+    private ObjectNode roomResponse() {
         ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("task", "color change");
-        objectNode.put("status", status);
-        objectNode.put("hue", hue);
-        objectNode.put("brightness", bright);
-        objectNode.put("saturation", sat);
+        objectNode.put("main", roomConfigurationDao.findRoomConfigurationModelByMainLike("yes").toString());
+        objectNode.put("rest", roomConfigurationDao.findRoomConfigurationModelsByMainLike("no").toString());
         return objectNode;
     }
 
     public ObjectNode responseObject(String response) {
         ObjectNode objectNode = mapper.createObjectNode();
         objectNode.put("response", response);
-        return objectNode;
-    }
-
-    public ObjectNode roomResponse() {
-        ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("main", roomConfigurationDao.findRoomConfigurationModelByMainLike("yes").toString());
-        objectNode.put("rest", roomConfigurationDao.findRoomConfigurationModelsByMainLike("no").toString());
         return objectNode;
     }
 

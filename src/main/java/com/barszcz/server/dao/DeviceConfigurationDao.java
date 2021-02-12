@@ -13,7 +13,8 @@ public interface DeviceConfigurationDao extends CrudRepository<DeviceConfigurati
 
     Optional<DeviceConfigurationModel> findDeviceConfigurationModelBySerialLike(int serial);
 
-    List<DeviceConfigurationModel> findDeviceConfigurationModelByRoomLike(String room);
+    List<DeviceConfigurationModel> findDeviceConfigurationModelsByRoomIDLike(int room);
+
 
     @Transactional
     void deleteBySerialLike(int serial);

@@ -6,7 +6,7 @@ create table if not exists configuration (
     bright INT not null,
     state varchar (250) not null,
     status varchar (250) not null,
-    room varchar (250) not null,
+    roomID INT not null,
     device_type varchar (250) not null
 );
 

@@ -30,10 +30,6 @@ public class DeviceController {
 
     private DeviceConfigurationDao deviceConfigurationDao;
     private UnassignedDeviceDao unassignedDeviceDao;
-    //    private UserDao userDao;
-//    private UserSettingsRespondDao userSettingsRespondDao;
-//    private RoomsDao roomsDao;
-//    private DeviceTypeDao deviceTypeDao;
     private SimpMessagingTemplate simpMessagingTemplate;
     private ScheduleDelayTask scheduleDelayTask;
 
@@ -41,8 +37,8 @@ public class DeviceController {
     private ObjectMapper mapper;
 
     @GetMapping(path = "/getDevices")
-    public List<DeviceConfigurationModel> getAllDevices(@RequestParam String room) {
-        return (List<DeviceConfigurationModel>) deviceConfigurationDao.findDeviceConfigurationModelByRoomLike(room);
+    public List<DeviceConfigurationModel> getAllDevices(@RequestParam int roomID) {
+        return (List<DeviceConfigurationModel>) deviceConfigurationDao.findDeviceConfigurationModelsByRoomIDLike(roomID);
     }
 
     @SubscribeMapping("/unassignedDevices")
@@ -62,7 +58,7 @@ public class DeviceController {
         DeviceConfigurationModel deviceConfigurationModel = new DeviceConfigurationModel();
         deviceConfigurationModel.setSerial(serial);
         deviceConfigurationModel.setDeviceName((String) jsonObject.get("deviceName"));
-        deviceConfigurationModel.setRoom((String) jsonObject.get("room"));
+        deviceConfigurationModel.setRoomID((int) jsonObject.get("roomID"));
         deviceConfigurationModel.setDeviceType((String) jsonObject.get("deviceType"));
         deviceConfigurationModel.setDeviceConnectionStatus("connected");
         deviceConfigurationModel.setHue(0);

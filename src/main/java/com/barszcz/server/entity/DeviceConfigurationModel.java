@@ -31,8 +31,8 @@ public class DeviceConfigurationModel {
     @Column(name = "status", nullable = false)
     String deviceConnectionStatus;
 
-    @Column(name = "room", nullable = false)
-    String room;
+    @Column(name = "roomID", nullable = false)
+    int roomID;
 
     @Column(name = "device_type", nullable = false)
     String deviceType;
