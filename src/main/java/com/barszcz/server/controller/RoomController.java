@@ -1,109 +1,78 @@
 package com.barszcz.server.controller;
 
-import com.barszcz.server.dao.DeviceConfigurationDao;
 import com.barszcz.server.dao.RoomConfigurationDao;
-import com.barszcz.server.entity.DeviceConfigurationModel;
 import com.barszcz.server.entity.RoomConfigurationModel;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.json.JSONException;
+import com.barszcz.server.exception.JsonObjectException;
+import com.barszcz.server.parser.JsonObjectParser;
+import com.barszcz.server.service.RoomService;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
+
 @RestController
-@AllArgsConstructor
 public class RoomController {
 
-    private DeviceConfigurationDao deviceConfigurationDao;
-    private SimpMessagingTemplate simpMessagingTemplate;
+    private final static String ROOM_NAME = "roomName";
+    private final static String MAIN_VALUE = "main";
+    private final static String ID_VALUE = "id";
+
     private RoomConfigurationDao roomConfigurationDao;
-    @Autowired
-    private ObjectMapper mapper;
+    private RoomService roomService;
+
+    public RoomController(RoomConfigurationDao roomConfigurationDao, RoomService roomService) {
+        this.roomConfigurationDao = roomConfigurationDao;
+        this.roomService = roomService;
+    }
+
+    private JsonObjectParser jsonParser = new JsonObjectParser();
 
     @SubscribeMapping("/rooms")
     public List<RoomConfigurationModel> findRooms() {
         return (List<RoomConfigurationModel>) roomConfigurationDao.findAll();
+
     }
 
     @PostMapping(path = "/addRoom")
-    public void addRoom(@RequestBody String body) throws JSONException {
-        JSONObject jsonObject = null;
-        try {
-            jsonObject = new JSONObject(body);
-        } catch (JSONException err) {
-            System.out.println(err.toString());
-        }
-        assert jsonObject != null;
-        String roomName = (String) jsonObject.get("roomName");
-        String main = (String) jsonObject.get("main");
-        RoomConfigurationModel roomConfigurationModel = new RoomConfigurationModel();
-        roomConfigurationModel.setRoomName(roomName);
-        roomConfigurationModel.setMain(main);
-        roomConfigurationDao.save(roomConfigurationModel);
-        simpMessagingTemplate.convertAndSend("/rooms/rooms", roomConfigurationDao.findAll());
+    public void addRoom(@RequestBody String body) throws Exception {
+        JSONObject jsonObject = jsonParser.parse(body);
+        String roomName = getString(jsonObject, ROOM_NAME);
+        String main = getString(jsonObject, MAIN_VALUE);
+        roomService.addRoom(roomName, main);
     }
 
     @DeleteMapping(path = "/deleteRoom/{id}")
     public void deleteDevice(@PathVariable("id") int id) {
         roomConfigurationDao.deleteRoomConfigurationModelByIdLike(id);
         System.out.println("deleted room with id:" + id);
-        deleteDevicesFromRoom(id);
-        simpMessagingTemplate.convertAndSend("/rooms/rooms", roomConfigurationDao.findAll());
+        roomService.deleteRoom(id);
     }
 
     @PostMapping(path = "/renameRoom")
     public void editNameRoom(@RequestBody String body) throws Exception {
-        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject = jsonParser.parse(body);
+        int id = getInt(jsonObject, ID_VALUE);
+        String name = getString(jsonObject, ROOM_NAME);
+        roomService.editName(name, id);
+    }
+
+
+    private String getString(JSONObject jsonObject, String value) throws JsonObjectException {
         try {
-            jsonObject = new JSONObject(body);
-        } catch (JSONException err) {
-            System.out.println(err.toString());
+            return jsonObject.getString(value);
+        } catch (Exception e) {
+            throw new JsonObjectException(e.toString());
         }
-        int id = (int) jsonObject.get("id");
-        String name = (String) jsonObject.get("name");
-        roomConfigurationDao.findRoomConfigurationModelByIdLike(id).map(deviceConfigurationModel -> {
-                    deviceConfigurationModel.setRoomName(name);
-                    return roomConfigurationDao.save(deviceConfigurationModel);
-                }
-        ).orElseThrow(
-                Exception::new
-        );
-        System.out.println("Rename room with id:" + id);
-        simpMessagingTemplate.convertAndSend("/rooms/rooms", roomConfigurationDao.findAll());
     }
 
-    private void deleteDevicesFromRoom(int roomID){
-        List<DeviceConfigurationModel> devices = new ArrayList<DeviceConfigurationModel>();
-        devices = deviceConfigurationDao.findDeviceConfigurationModelsByRoomIDLike(roomID);
-        devices.forEach(device ->{
-            int serial = device.getSerial();
-            deviceConfigurationDao.deleteBySerialLike(serial);
-            System.out.println("deleted device with serial:" + serial);
-            simpMessagingTemplate.convertAndSend("/device/device/" + serial, responseObject("doesnt exists"));
-        });
+    private int getInt(JSONObject jsonObject, String value) throws JsonObjectException {
+        try {
+            return jsonObject.getInt(value);
+        } catch (Exception e) {
+            throw new JsonObjectException(e.toString());
+        }
     }
-
-    private ObjectNode roomResponse() {
-        ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("main", roomConfigurationDao.findRoomConfigurationModelByMainLike("yes").toString());
-        objectNode.put("rest", roomConfigurationDao.findRoomConfigurationModelsByMainLike("no").toString());
-        return objectNode;
-    }
-
-    public ObjectNode responseObject(String response) {
-        ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("response", response);
-        return objectNode;
-    }
-
 
 }
