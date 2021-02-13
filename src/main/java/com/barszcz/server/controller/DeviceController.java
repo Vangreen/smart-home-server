@@ -77,7 +77,7 @@ public class DeviceController {
     @MessageMapping("/changeDeviceColor/{serial}")
     public void changeDeviceColor(@DestinationVariable("serial") int serial, @Payload String payload) throws Exception {
         JSONObject jsonObject = jsonService.parse(payload);
-        String status = (String) jsonObject.get("status");
+        String status = jsonService.getString(jsonObject, SERIAL_VALUE);
         Hsv hsv = jsonService.bodyToHsv(jsonObject);
         deviceService.changeDeviceColor(serial, status, hsv);
     }
