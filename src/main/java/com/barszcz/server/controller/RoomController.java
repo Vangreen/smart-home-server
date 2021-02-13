@@ -2,9 +2,9 @@ package com.barszcz.server.controller;
 
 import com.barszcz.server.dao.RoomConfigurationDao;
 import com.barszcz.server.entity.RoomConfigurationModel;
-import com.barszcz.server.exception.JsonObjectException;
-import com.barszcz.server.parser.JsonObjectParser;
+import com.barszcz.server.service.JsonObjectService;
 import com.barszcz.server.service.RoomService;
+import lombok.AllArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +13,7 @@ import java.util.List;
 
 
 @RestController
+@AllArgsConstructor
 public class RoomController {
 
     private final static String ROOM_NAME = "roomName";
@@ -21,13 +22,8 @@ public class RoomController {
 
     private RoomConfigurationDao roomConfigurationDao;
     private RoomService roomService;
+    private JsonObjectService jsonService;
 
-    public RoomController(RoomConfigurationDao roomConfigurationDao, RoomService roomService) {
-        this.roomConfigurationDao = roomConfigurationDao;
-        this.roomService = roomService;
-    }
-
-    private JsonObjectParser jsonParser = new JsonObjectParser();
 
     @SubscribeMapping("/rooms")
     public List<RoomConfigurationModel> findRooms() {
@@ -37,9 +33,9 @@ public class RoomController {
 
     @PostMapping(path = "/addRoom")
     public void addRoom(@RequestBody String body) throws Exception {
-        JSONObject jsonObject = jsonParser.parse(body);
-        String roomName = getString(jsonObject, ROOM_NAME);
-        String main = getString(jsonObject, MAIN_VALUE);
+        JSONObject jsonObject = jsonService.parse(body);
+        String roomName = jsonService.getString(jsonObject, ROOM_NAME);
+        String main = jsonService.getString(jsonObject, MAIN_VALUE);
         roomService.addRoom(roomName, main);
     }
 
@@ -52,27 +48,9 @@ public class RoomController {
 
     @PostMapping(path = "/renameRoom")
     public void editNameRoom(@RequestBody String body) throws Exception {
-        JSONObject jsonObject = jsonParser.parse(body);
-        int id = getInt(jsonObject, ID_VALUE);
-        String name = getString(jsonObject, ROOM_NAME);
+        JSONObject jsonObject = jsonService.parse(body);
+        int id = jsonService.getInt(jsonObject, ID_VALUE);
+        String name = jsonService.getString(jsonObject, ROOM_NAME);
         roomService.editName(name, id);
     }
-
-
-    private String getString(JSONObject jsonObject, String value) throws JsonObjectException {
-        try {
-            return jsonObject.getString(value);
-        } catch (Exception e) {
-            throw new JsonObjectException(e.toString());
-        }
-    }
-
-    private int getInt(JSONObject jsonObject, String value) throws JsonObjectException {
-        try {
-            return jsonObject.getInt(value);
-        } catch (Exception e) {
-            throw new JsonObjectException(e.toString());
-        }
-    }
-
 }
