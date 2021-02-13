@@ -16,6 +16,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -28,6 +29,11 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Autowired
     private ObjectMapper mapper;
+
+
+    public List<UnassignedDeviceModel> findAll() {
+        return (List<UnassignedDeviceModel>) unassignedDeviceDao.findAll();
+    }
 
     public void addDevice(DeviceConfigurationModel device) {
         DeviceConfigurationModel deviceConfigurationModel = new DeviceConfigurationModel();

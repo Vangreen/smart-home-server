@@ -2,8 +2,13 @@ package com.barszcz.server.service;
 
 import com.barszcz.server.entity.DeviceConfigurationModel;
 import com.barszcz.server.entity.Hsv;
+import com.barszcz.server.entity.UnassignedDeviceModel;
+
+import java.util.List;
 
 public interface DeviceService {
+
+    List<UnassignedDeviceModel> findAll();
 
     void addDevice(DeviceConfigurationModel deviceConfigurationModel);
 

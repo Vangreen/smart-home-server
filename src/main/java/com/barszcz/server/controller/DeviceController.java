@@ -1,7 +1,6 @@
 package com.barszcz.server.controller;
 
 import com.barszcz.server.dao.DeviceConfigurationDao;
-import com.barszcz.server.dao.UnassignedDeviceDao;
 import com.barszcz.server.entity.DeviceConfigurationModel;
 import com.barszcz.server.entity.Hsv;
 import com.barszcz.server.entity.UnassignedDeviceModel;
@@ -25,7 +24,6 @@ public class DeviceController {
     private static final String DEVICE_TYPE_VALUE = "deviceType";
 
     private DeviceConfigurationDao deviceConfigurationDao;
-    private UnassignedDeviceDao unassignedDeviceDao;
     private JsonObjectService jsonService;
     private DeviceService deviceService;
 
@@ -37,7 +35,7 @@ public class DeviceController {
 
     @SubscribeMapping("/unassignedDevices")
     public List<UnassignedDeviceModel> initDevice() {
-        return (List<UnassignedDeviceModel>) unassignedDeviceDao.findAll();
+        return deviceService.findAll();
     }
 
     @PostMapping(path = "/addDevice")
