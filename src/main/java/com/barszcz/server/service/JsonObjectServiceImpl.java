@@ -1,8 +1,8 @@
 package com.barszcz.server.service;
 
 import com.barszcz.server.entity.DeviceConfigurationModel;
+import com.barszcz.server.entity.Hsv;
 import com.barszcz.server.exception.JsonObjectException;
-import com.barszcz.server.exception.ParseException;
 import com.barszcz.server.parser.JsonObjectParser;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
@@ -11,9 +11,12 @@ import org.springframework.stereotype.Service;
 public class JsonObjectServiceImpl implements JsonObjectService {
 
     private static final String SERIAL_VALUE = "serial";
-    private static final String DEVICE_NAME_VALUE = "serial";
-    private static final String ROOM_ID_VALUE = "serial";
-    private static final String DEVICE_TYPE_VALUE = "serial";
+    private static final String DEVICE_NAME_VALUE = "deviceName";
+    private static final String ROOM_ID_VALUE = "roomID";
+    private static final String DEVICE_TYPE_VALUE = "deviceType";
+    private static final String HUE = "hue";
+    private static final String SATURATION = "saturation";
+    private static final String BRIGHTNESS = "brightness";
 
     private JsonObjectParser jsonParser = new JsonObjectParser();
 
@@ -34,17 +37,39 @@ public class JsonObjectServiceImpl implements JsonObjectService {
     }
 
 
-    public JSONObject parse(String body) throws ParseException {
-        return jsonParser.parse(body);
+    public JSONObject parse(String body) throws JsonObjectException {
+        try {
+            return jsonParser.parse(body);
+        } catch (Exception e) {
+            throw new JsonObjectException(e.toString());
+        }
     }
 
     public DeviceConfigurationModel bodyToDevice(JSONObject body) throws JsonObjectException {
-        DeviceConfigurationModel deviceConfigurationModel = new DeviceConfigurationModel();
-        deviceConfigurationModel.setSerial(getInt(body, SERIAL_VALUE));
-        deviceConfigurationModel.setDeviceName(getString(body, DEVICE_NAME_VALUE));
-        deviceConfigurationModel.setRoomID(getInt(body, ROOM_ID_VALUE));
-        deviceConfigurationModel.setDeviceType(getString(body, DEVICE_TYPE_VALUE));
-        return deviceConfigurationModel;
+        try {
+            DeviceConfigurationModel deviceConfigurationModel = new DeviceConfigurationModel();
+            deviceConfigurationModel.setSerial(getInt(body, SERIAL_VALUE));
+            deviceConfigurationModel.setDeviceName(getString(body, DEVICE_NAME_VALUE));
+            deviceConfigurationModel.setRoomID(getInt(body, ROOM_ID_VALUE));
+            deviceConfigurationModel.setDeviceType(getString(body, DEVICE_TYPE_VALUE));
+            return deviceConfigurationModel;
+        } catch (Exception e) {
+            throw new JsonObjectException(e.toString());
+        }
+
+    }
+
+
+    public Hsv bodyToHsv(JSONObject body) throws JsonObjectException {
+        try {
+            return Hsv.builder()
+                    .hue(getInt(body, HUE))
+                    .saturation(getInt(body, SATURATION))
+                    .bright(getInt(body, BRIGHTNESS))
+                    .build();
+        } catch (Exception e) {
+            throw new JsonObjectException(e.toString());
+        }
 
     }
 }
