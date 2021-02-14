@@ -21,6 +21,7 @@ import java.util.List;
 public class DeviceController {
 
     private final static String SERIAL_VALUE = "serial";
+    private final static String STATUS_VALUE = "status";
     private static final String DEVICE_TYPE_VALUE = "deviceType";
 
     private DeviceConfigurationDao deviceConfigurationDao;
@@ -53,8 +54,8 @@ public class DeviceController {
     }
 
     @SubscribeMapping("/device/{serial}")
-    public void initDevice(@DestinationVariable("serial") int serial) {
-        deviceService.initDevice(serial);
+    public Object initDevice(@DestinationVariable("serial") int serial) {
+        return deviceService.initDevice(serial);
     }
 
     @MessageMapping("/doesntExists")
@@ -68,14 +69,14 @@ public class DeviceController {
     @MessageMapping("/changeDeviceStatus/{serial}")
     public void changeDeviceStatus(@DestinationVariable("serial") int serial, @Payload String payload) throws Exception {
         JSONObject jsonObject = jsonService.parse(payload);
-        String status = jsonService.getString(jsonObject, SERIAL_VALUE);
+        String status = jsonService.getString(jsonObject, STATUS_VALUE);
         deviceService.changeDeviceStatus(serial, status);
     }
 
     @MessageMapping("/changeDeviceColor/{serial}")
     public void changeDeviceColor(@DestinationVariable("serial") int serial, @Payload String payload) throws Exception {
         JSONObject jsonObject = jsonService.parse(payload);
-        String status = jsonService.getString(jsonObject, SERIAL_VALUE);
+        String status = jsonService.getString(jsonObject, STATUS_VALUE);
         Hsv hsv = jsonService.bodyToHsv(jsonObject);
         deviceService.changeDeviceColor(serial, status, hsv);
     }

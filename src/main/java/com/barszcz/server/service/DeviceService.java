@@ -20,6 +20,6 @@ public interface DeviceService {
 
     void doesntExist(int serial, String deviceType) throws Exception;
 
-    void initDevice(int serial);
+    Object initDevice(int serial);
 
 }
