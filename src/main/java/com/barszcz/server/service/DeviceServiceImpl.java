@@ -90,12 +90,12 @@ public class DeviceServiceImpl implements DeviceService {
         System.out.println("new unassigned device with serial:" + serial);
     }
 
-    public void initDevice(int serial) {
+    public Object initDevice(int serial) {
         System.out.println("new device subscribed for serial:" + serial);
         if (deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).isPresent()) {
-            deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial);
+            return deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial);
         } else {
-            responseObject("doesnt exists");
+            return responseObject("doesnt exists");
         }
     }
 
