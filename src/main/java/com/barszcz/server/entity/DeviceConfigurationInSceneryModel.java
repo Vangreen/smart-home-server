@@ -2,16 +2,14 @@ package com.barszcz.server.entity;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
-@Table(name = "roomsConfigurationInSceneries")
+@Table(name = "deviceConfigurationInSceneries")
 @Data
-public class RoomConfigurationInSceneryModel {
+public class DeviceConfigurationInSceneryModel {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     int id;
 

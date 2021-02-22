@@ -2,16 +2,14 @@ package com.barszcz.server.entity;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "sceneryConfiguration")
 @Data
 public class SceneryConfigurationModel {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     int id;
 
@@ -26,5 +24,8 @@ public class SceneryConfigurationModel {
 
     @Column(name = "logo", nullable = false)
     String logo;
+
+    @Column(name = "scenery_status", nullable = false)
+    String sceneryStatus;
 
 }

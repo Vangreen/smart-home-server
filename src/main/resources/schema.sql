@@ -27,10 +27,11 @@ create table if not exists sceneryConfiguration (
 --     user_id int not null,
     room_id int not null,
     scenery_name varchar (250) not null,
-    logo varchar (250) not null
+    logo varchar (250) not null,
+    scenery_status varchar (250) not null
 );
 
-create table if not exists roomsConfigurationInSceneries (
+create table if not exists deviceConfigurationInSceneries (
     id int AUTO_INCREMENT PRIMARY KEY,
     scenery_id int not null,
     device_serial int not null,
