@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -61,31 +62,41 @@ public class SceneryServiceImpl implements SceneryService {
 
     public void changeSceneryStatus(int sceneryID, SceneryConfigurationModel sceneryConfigurationModel) throws Exception {
         String status = sceneryConfigurationModel.getSceneryStatus();
-        sceneryConfigurationDao.findSceneryConfigurationModelByIdLike(sceneryID).map(scenery ->{
-            scenery.setSceneryStatus(status);
-            return sceneryConfigurationDao.save(scenery);
-        }
+        int sceneryRoomID = sceneryConfigurationDao.findSceneryConfigurationModelByIdLike(sceneryID).map(scenery -> {
+                    scenery.setSceneryStatus(status);
+                    sceneryConfigurationDao.save(scenery);
+                    return scenery.getRoomID();
+                }
         ).orElseThrow(
                 Exception::new
         );
 
         List<DeviceConfigurationInSceneryModel> devicesInScenery = deviceConfigurationInSceneryDao.findRoomConfigurationInSceneryModelsBySceneryIDLike(sceneryID);
-        devicesInScenery.forEach(device ->{
+        devicesInScenery.forEach(device -> {
             int deviceSerial = device.getDeviceSerial();
             int deviceHue = device.getHue();
             int deviceSat = device.getSaturation();
             int deviceBright = device.getBrightness();
             deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(deviceSerial).map(deviceConfigurationModel -> {
-                deviceConfigurationModel.setDeviceStatus(status);
-                deviceConfigurationModel.setHue(deviceHue);
-                deviceConfigurationModel.setSaturation(deviceSat);
-                deviceConfigurationModel.setBrightness(deviceBright);
-                deviceConfigurationDao.save(deviceConfigurationModel);
-                simpMessagingTemplate.convertAndSend("/device/device/" + deviceSerial, colorChange(status, deviceHue, deviceBright, deviceSat));
+                if (status.equals("On")) {
+                    deviceConfigurationModel.setDeviceStatus(device.getDeviceState());
+                    deviceConfigurationModel.setHue(deviceHue);
+                    deviceConfigurationModel.setSaturation(deviceSat);
+                    deviceConfigurationModel.setBrightness(deviceBright);
+                    deviceConfigurationDao.save(deviceConfigurationModel);
+                    simpMessagingTemplate.convertAndSend("/device/device/" + deviceSerial, colorChange(device.getDeviceState(), deviceHue, deviceBright, deviceSat));
+                } else {
+                    deviceConfigurationModel.setDeviceStatus(status);
+                    deviceConfigurationDao.save(deviceConfigurationModel);
+                    simpMessagingTemplate.convertAndSend("/device/device/" + deviceSerial, statusChange(status));
+                }
+
                 return true;
             });
+
+
         });
-        simpMessagingTemplate.convertAndSend("/scenery/scenery/"+sceneryID, sceneryConfigurationDao.findSceneryConfigurationModelByIdLike(sceneryID));
+        simpMessagingTemplate.convertAndSend("/scenery/scenery/" + sceneryRoomID, sceneryConfigurationDao.findSceneryConfigurationModelByIdLike(sceneryID));
     }
 
     private ObjectNode colorChange(String status, int hue, int bright, int sat) {
@@ -96,6 +107,13 @@ public class SceneryServiceImpl implements SceneryService {
         objectNode.put("brightness", bright);
         objectNode.put("saturation", sat);
         return objectNode;
+    }
+
+    private HashMap<String, String> statusChange(String status) {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("task", "status change");
+        map.put("status", status);
+        return map;
     }
 }
 
