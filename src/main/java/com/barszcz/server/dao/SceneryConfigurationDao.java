@@ -13,4 +13,6 @@ public interface SceneryConfigurationDao extends CrudRepository<SceneryConfigura
     Optional<SceneryConfigurationModel> findSceneryConfigurationModelByIdLike(int id);
 
     Optional<SceneryConfigurationModel> findSceneryConfigurationModelBySceneryNameLikeAndRoomIDLike(String sceneryName, int roomID);
+
+    Optional<List<SceneryConfigurationModel>> findSceneryConfigurationModelsBySceneryStatusLikeAndRoomIDLike(String sceneryStatus, int roomID);
 }

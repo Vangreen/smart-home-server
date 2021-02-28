@@ -62,7 +62,20 @@ public class SceneryServiceImpl implements SceneryService {
 
     public void changeSceneryStatus(int sceneryID, SceneryConfigurationModel sceneryConfigurationModel) throws Exception {
         String status = sceneryConfigurationModel.getSceneryStatus();
-        int sceneryRoomID = sceneryConfigurationDao.findSceneryConfigurationModelByIdLike(sceneryID).map(scenery -> {
+        int sceneryRoomID = sceneryConfigurationModel.getRoomID();
+
+        if(status.equals("On")){
+            sceneryConfigurationDao.findSceneryConfigurationModelsBySceneryStatusLikeAndRoomIDLike(status, sceneryRoomID).map(sceneries ->{
+                sceneries.forEach(scenery->{
+                    scenery.setSceneryStatus("Off");
+                    sceneryConfigurationDao.save(scenery);
+                    simpMessagingTemplate.convertAndSend("/scenery/scenery/" + scenery.getId(), scenery);
+                });
+                return null;
+            });
+        }
+
+        sceneryConfigurationDao.findSceneryConfigurationModelByIdLike(sceneryID).map(scenery -> {
                     scenery.setSceneryStatus(status);
                     sceneryConfigurationDao.save(scenery);
                     return scenery.getRoomID();
@@ -70,6 +83,8 @@ public class SceneryServiceImpl implements SceneryService {
         ).orElseThrow(
                 Exception::new
         );
+
+
 
         List<DeviceConfigurationInSceneryModel> devicesInScenery = deviceConfigurationInSceneryDao.findRoomConfigurationInSceneryModelsBySceneryIDLike(sceneryID);
         devicesInScenery.forEach(device -> {
@@ -96,7 +111,7 @@ public class SceneryServiceImpl implements SceneryService {
 
 
         });
-        simpMessagingTemplate.convertAndSend("/scenery/scenery/" + sceneryRoomID, sceneryConfigurationDao.findSceneryConfigurationModelByIdLike(sceneryID));
+        simpMessagingTemplate.convertAndSend("/scenery/scenery/" + sceneryID, sceneryConfigurationDao.findSceneryConfigurationModelByIdLike(sceneryID));
     }
 
     private ObjectNode colorChange(String status, int hue, int bright, int sat) {
