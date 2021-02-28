@@ -3,6 +3,7 @@ package com.barszcz.server.service;
 import com.barszcz.server.dao.DeviceConfigurationDao;
 import com.barszcz.server.dao.RoomConfigurationDao;
 import com.barszcz.server.entity.DeviceConfigurationModel;
+import com.barszcz.server.entity.Responses.SimpleResponse;
 import com.barszcz.server.entity.RoomConfigurationModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -21,8 +22,6 @@ public class RoomServiceImpl implements RoomService {
     private DeviceConfigurationDao deviceConfigurationDao;
     private SimpMessagingTemplate simpMessagingTemplate;
     private RoomConfigurationDao roomConfigurationDao;
-    @Autowired
-    private ObjectMapper mapper;
 
 
     public void addRoom(String roomName, String main) {
@@ -42,7 +41,7 @@ public class RoomServiceImpl implements RoomService {
             int serial = device.getSerial();
             deviceConfigurationDao.deleteBySerialLike(serial);
             System.out.println("deleted device with serial:" + serial);
-            simpMessagingTemplate.convertAndSend("/device/device/" + serial, responseObject("doesnt exists"));
+            simpMessagingTemplate.convertAndSend("/device/device/" + serial, new SimpleResponse("doesnt exists"));
         });
         roomConfigurationDao.deleteRoomConfigurationModelByIdLike(roomID);
         simpMessagingTemplate.convertAndSend("/rooms/rooms", roomConfigurationDao.findAll());
@@ -61,9 +60,4 @@ public class RoomServiceImpl implements RoomService {
         simpMessagingTemplate.convertAndSend("/rooms/rooms", roomConfigurationDao.findAll());
     }
 
-    private ObjectNode responseObject(String response) {
-        ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("response", response);
-        return objectNode;
-    }
 }

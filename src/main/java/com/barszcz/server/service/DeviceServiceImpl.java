@@ -5,18 +5,17 @@ import com.barszcz.server.dao.UnassignedDeviceDao;
 import com.barszcz.server.entity.DeviceConfigurationModel;
 import com.barszcz.server.entity.Hsv;
 import com.barszcz.server.entity.Requests.RenameDeviceRequest;
+import com.barszcz.server.entity.Responses.ColorChangeResponse;
+import com.barszcz.server.entity.Responses.SimpleResponse;
+import com.barszcz.server.entity.Responses.StatusChangeResponse;
 import com.barszcz.server.entity.UnassignedDeviceModel;
 import com.barszcz.server.exception.ChangeColorException;
 import com.barszcz.server.exception.ChangeDeviceStatusException;
 import com.barszcz.server.scheduler.ScheduleDelayTask;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -27,10 +26,7 @@ public class DeviceServiceImpl implements DeviceService {
     private UnassignedDeviceDao unassignedDeviceDao;
     private SimpMessagingTemplate simpMessagingTemplate;
     private ScheduleDelayTask scheduleDelayTask;
-
-    @Autowired
-    private ObjectMapper mapper;
-
+    private SceneryService sceneryService;
 
     public List<UnassignedDeviceModel> findAll() {
         return (List<UnassignedDeviceModel>) unassignedDeviceDao.findAll();
@@ -65,12 +61,13 @@ public class DeviceServiceImpl implements DeviceService {
         System.out.println("color change for device:" + serial);
 
         deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).map(deviceConfigurationModel -> {
+            sceneryService.validateSceneryByDeviceStatus(serial, status, hsv, deviceConfigurationModel.getRoomID());
             deviceConfigurationModel.setDeviceStatus(status);
             deviceConfigurationModel.setHue(hsv.getHue());
             deviceConfigurationModel.setSaturation(hsv.getSaturation());
             deviceConfigurationModel.setBrightness(hsv.getBright());
             deviceConfigurationDao.save(deviceConfigurationModel);
-            simpMessagingTemplate.convertAndSend("/device/device/" + serial, colorChange(status, hsv.getHue(), hsv.getBright(), hsv.getSaturation()));
+            simpMessagingTemplate.convertAndSend("/device/device/" + serial, new ColorChangeResponse(status, hsv.getHue(), hsv.getBright(), hsv.getSaturation()));
             return true;
         })
                 .orElseThrow(() -> new ChangeColorException("Change device error"));
@@ -79,9 +76,10 @@ public class DeviceServiceImpl implements DeviceService {
     public void changeDeviceStatus(int serial, String status) throws Exception {
         System.out.println("state change for device:" + serial);
         deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).map(deviceConfigurationModel -> {
+            sceneryService.validateSceneryByDeviceStatus(serial, status, null, deviceConfigurationModel.getRoomID());
             deviceConfigurationModel.setDeviceStatus(status);
             deviceConfigurationDao.save(deviceConfigurationModel);
-            simpMessagingTemplate.convertAndSend("/device/device/" + serial, statusChange(status));
+            simpMessagingTemplate.convertAndSend("/device/device/" + serial, new StatusChangeResponse(status));
             return true;
         })
                 .orElseThrow(() -> new ChangeDeviceStatusException("Change device error"));
@@ -103,7 +101,7 @@ public class DeviceServiceImpl implements DeviceService {
         if (deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).isPresent()) {
             return deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial);
         } else {
-            return responseObject("doesnt exists");
+            return new SimpleResponse("doesnt exists");
         }
     }
 
@@ -111,30 +109,8 @@ public class DeviceServiceImpl implements DeviceService {
     public void deleteDevice(int serial) {
         deviceConfigurationDao.deleteBySerialLike(serial);
         System.out.println("deleted device with serial:" + serial);
-        simpMessagingTemplate.convertAndSend("/device/device/" + serial, responseObject("doesnt exists"));
+        simpMessagingTemplate.convertAndSend("/device/device/" + serial, new SimpleResponse("doesnt exists"));
     }
 
 
-    private HashMap<String, String> statusChange(String status) {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("task", "status change");
-        map.put("status", status);
-        return map;
-    }
-
-    private ObjectNode colorChange(String status, int hue, int bright, int sat) {
-        ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("task", "color change");
-        objectNode.put("status", status);
-        objectNode.put("hue", hue);
-        objectNode.put("brightness", bright);
-        objectNode.put("saturation", sat);
-        return objectNode;
-    }
-
-    private ObjectNode responseObject(String response) {
-        ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("response", response);
-        return objectNode;
-    }
 }

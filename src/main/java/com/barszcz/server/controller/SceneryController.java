@@ -17,9 +17,6 @@ import java.util.List;
 @AllArgsConstructor
 public class SceneryController {
 
-//    private JsonObjectService jsonService;
-//    private SceneryConfigurationDao sceneryConfigurationDao;
-//    private DeviceConfigurationInSceneryDao deviceConfigurationInSceneryDao;
 
     private SceneryService sceneryService;
 

@@ -1,4 +1,5 @@
 package com.barszcz.server.service;
+import com.barszcz.server.entity.Hsv;
 import com.barszcz.server.entity.Requests.SceneriesGetRequest;
 import com.barszcz.server.entity.SceneryConfigurationModel;
 import com.barszcz.server.entity.SceneryCreation;
@@ -13,4 +14,6 @@ public interface SceneryService {
     List<SceneryConfigurationModel> getSceneries(SceneriesGetRequest sceneriesGetRequest);
 
     void changeSceneryStatus(int sceneryID, SceneryConfigurationModel sceneryConfigurationModel) throws Exception;
+
+    void validateSceneryByDeviceStatus(int deviceSerial, String deviceStatus, Hsv hsv, int roomID);
 }
