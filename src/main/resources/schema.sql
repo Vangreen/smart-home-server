@@ -20,3 +20,23 @@ create table if not exists roomConfiguration (
     room_name varchar (250) not null,
     main VARCHAR (250) not null
     );
+
+
+create table if not exists sceneryConfiguration (
+    id int AUTO_INCREMENT PRIMARY KEY,
+--     user_id int not null,
+    room_id int not null,
+    scenery_name varchar (250) not null,
+    logo varchar (250) not null,
+    scenery_status varchar (250) not null
+);
+
+create table if not exists deviceConfigurationInSceneries (
+    id int AUTO_INCREMENT PRIMARY KEY,
+    scenery_id int not null,
+    device_serial int not null,
+    hue INT not null,
+    sat INT not null,
+    bright INT not null,
+    state varchar (250) not null
+)

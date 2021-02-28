@@ -18,8 +18,8 @@ public class ConfigurationWebSocketDao implements WebSocketMessageBrokerConfigur
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/topic", "/rooms","/device","/room", "/user");
-        registry.setApplicationDestinationPrefixes("/app","/rooms","/device", "/user");
+        registry.enableSimpleBroker("/topic", "/rooms","/device","/room", "/user", "/scenery");
+        registry.setApplicationDestinationPrefixes("/app","/rooms","/device", "/user", "/scenery");
     }
 
 }
