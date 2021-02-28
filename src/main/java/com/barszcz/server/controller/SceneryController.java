@@ -1,5 +1,8 @@
 package com.barszcz.server.controller;
 
+import com.barszcz.server.dao.DeviceConfigurationInSceneryDao;
+import com.barszcz.server.dao.SceneryConfigurationDao;
+import com.barszcz.server.entity.DeviceConfigurationInSceneryModel;
 import com.barszcz.server.entity.Requests.SceneriesGetRequest;
 import com.barszcz.server.entity.SceneryConfigurationModel;
 import com.barszcz.server.entity.SceneryCreation;
@@ -19,6 +22,8 @@ public class SceneryController {
 
 
     private SceneryService sceneryService;
+    private SceneryConfigurationDao sceneryConfigurationDao;
+    private DeviceConfigurationInSceneryDao deviceConfigurationInSceneryDao;
 
     @PostMapping(path = "/addScenery")
     public void addScenery(@RequestBody SceneryCreation sceneryCreation){
@@ -28,6 +33,13 @@ public class SceneryController {
     @PostMapping(path = "/getSceneries")
     public List<SceneryConfigurationModel> getSceneries(@RequestBody SceneriesGetRequest sceneriesGetRequest){
         return sceneryService.getSceneries(sceneriesGetRequest);
+    }
+
+    @DeleteMapping(path = "/deleteScenery/{sceneryID}")
+    public void deleteScenery(@PathVariable int sceneryID){
+        sceneryConfigurationDao.deleteAllByIdLike(sceneryID);
+        deviceConfigurationInSceneryDao.deleteAllBySceneryIDLike(sceneryID);
+        System.out.println("Deleted scenery with id: " + sceneryID);
     }
 
     @MessageMapping("/changeSceneryStatus/{sceneryID}")
