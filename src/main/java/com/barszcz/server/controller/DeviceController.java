@@ -3,6 +3,7 @@ package com.barszcz.server.controller;
 import com.barszcz.server.dao.DeviceConfigurationDao;
 import com.barszcz.server.entity.DeviceConfigurationModel;
 import com.barszcz.server.entity.Hsv;
+import com.barszcz.server.entity.Requests.RenameDeviceRequest;
 import com.barszcz.server.entity.UnassignedDeviceModel;
 import com.barszcz.server.service.DeviceService;
 import com.barszcz.server.service.JsonObjectService;
@@ -44,6 +45,11 @@ public class DeviceController {
         JSONObject jsonObject = jsonService.parse(body);
         deviceService.addDevice(jsonService.bodyToDevice(jsonObject));
 
+    }
+
+    @PostMapping(path = "/renameDevice")
+    public void remameDevice(@RequestBody RenameDeviceRequest renameDeviceRequest) {
+        deviceService.renameDevice(renameDeviceRequest);
     }
 
     @PostMapping(path = "/deleteDevice")

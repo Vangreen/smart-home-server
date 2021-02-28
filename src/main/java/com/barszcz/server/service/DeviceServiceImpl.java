@@ -4,6 +4,7 @@ import com.barszcz.server.dao.DeviceConfigurationDao;
 import com.barszcz.server.dao.UnassignedDeviceDao;
 import com.barszcz.server.entity.DeviceConfigurationModel;
 import com.barszcz.server.entity.Hsv;
+import com.barszcz.server.entity.Requests.RenameDeviceRequest;
 import com.barszcz.server.entity.UnassignedDeviceModel;
 import com.barszcz.server.exception.ChangeColorException;
 import com.barszcz.server.exception.ChangeDeviceStatusException;
@@ -51,6 +52,13 @@ public class DeviceServiceImpl implements DeviceService {
         unassignedDeviceDao.deleteBySerialLike(serial);
         simpMessagingTemplate.convertAndSend("/device/device/" + serial, deviceConfigurationModel);
         System.out.println("added device with serial:" + serial);
+    }
+
+    public void renameDevice(RenameDeviceRequest renameDeviceRequest){
+        deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(renameDeviceRequest.getDeviceSerial()).map(device->{
+            device.setDeviceName(renameDeviceRequest.getNewDeviceName());
+            return deviceConfigurationDao.save(device);
+        });
     }
 
     public void changeDeviceColor(int serial, String status, Hsv hsv) throws Exception {
