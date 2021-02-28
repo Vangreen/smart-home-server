@@ -4,7 +4,7 @@ import com.barszcz.server.dao.DeviceConfigurationDao;
 import com.barszcz.server.dao.DeviceConfigurationInSceneryDao;
 import com.barszcz.server.dao.SceneryConfigurationDao;
 import com.barszcz.server.entity.*;
-import com.barszcz.server.exception.ChangeColorException;
+import com.barszcz.server.entity.Requests.SceneriesGetRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.AllArgsConstructor;
@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @AllArgsConstructor

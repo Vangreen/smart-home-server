@@ -1,4 +1,4 @@
-package com.barszcz.server.entity;
+package com.barszcz.server.entity.Requests;
 
 import lombok.Getter;
 import lombok.Setter;

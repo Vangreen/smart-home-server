@@ -1,6 +1,6 @@
 package com.barszcz.server.controller;
 
-import com.barszcz.server.entity.SceneriesGetRequest;
+import com.barszcz.server.entity.Requests.SceneriesGetRequest;
 import com.barszcz.server.entity.SceneryConfigurationModel;
 import com.barszcz.server.entity.SceneryCreation;
 import com.barszcz.server.service.SceneryService;
@@ -8,10 +8,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.web.bind.annotation.*;
 
-import javax.xml.xpath.XPath;
 import java.util.List;
 
 

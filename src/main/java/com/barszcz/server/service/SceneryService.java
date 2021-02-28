@@ -1,5 +1,5 @@
 package com.barszcz.server.service;
-import com.barszcz.server.entity.SceneriesGetRequest;
+import com.barszcz.server.entity.Requests.SceneriesGetRequest;
 import com.barszcz.server.entity.SceneryConfigurationModel;
 import com.barszcz.server.entity.SceneryCreation;
 
