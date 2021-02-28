@@ -27,8 +27,5 @@ public interface DeviceService {
 
     Object initDevice(int serial);
 
-    ObjectNode objectColorChange(String status, int hue, int bright, int sat);
-
-    HashMap<String, String> statusChange(java.lang.String status);
 
 }

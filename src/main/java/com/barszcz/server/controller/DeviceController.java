@@ -7,6 +7,7 @@ import com.barszcz.server.entity.Requests.RenameDeviceRequest;
 import com.barszcz.server.entity.UnassignedDeviceModel;
 import com.barszcz.server.service.DeviceService;
 import com.barszcz.server.service.JsonObjectService;
+import com.barszcz.server.service.SceneryService;
 import lombok.AllArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -28,7 +29,7 @@ public class DeviceController {
     private DeviceConfigurationDao deviceConfigurationDao;
     private JsonObjectService jsonService;
     private DeviceService deviceService;
-
+    private SceneryService sceneryService;
 
     @GetMapping(path = "/getDevices")
     public List<DeviceConfigurationModel> getAllDevices(@RequestParam int roomID) {
@@ -84,6 +85,7 @@ public class DeviceController {
         JSONObject jsonObject = jsonService.parse(payload);
         String status = jsonService.getString(jsonObject, STATUS_VALUE);
         Hsv hsv = jsonService.bodyToHsv(jsonObject);
+//        sceneryService.validateScenery(serial, status);
         deviceService.changeDeviceColor(serial, status, hsv);
     }
 
