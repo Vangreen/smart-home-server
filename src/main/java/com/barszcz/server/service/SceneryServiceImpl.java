@@ -23,7 +23,7 @@ public class SceneryServiceImpl implements SceneryService {
     private DeviceConfigurationInSceneryDao deviceConfigurationInSceneryDao;
     private DeviceConfigurationDao deviceConfigurationDao;
     private SimpMessagingTemplate simpMessagingTemplate;
-
+    private DeviceService deviceService;
     @Autowired
     private ObjectMapper mapper;
 
@@ -97,11 +97,11 @@ public class SceneryServiceImpl implements SceneryService {
                     deviceConfigurationModel.setSaturation(deviceSat);
                     deviceConfigurationModel.setBrightness(deviceBright);
                     deviceConfigurationDao.save(deviceConfigurationModel);
-                    simpMessagingTemplate.convertAndSend("/device/device/" + deviceSerial, colorChange(device.getDeviceState(), deviceHue, deviceBright, deviceSat));
+                    simpMessagingTemplate.convertAndSend("/device/device/" + deviceSerial, deviceService.objectColorChange(device.getDeviceState(), deviceHue, deviceBright, deviceSat));
                 } else {
                     deviceConfigurationModel.setDeviceStatus(status);
                     deviceConfigurationDao.save(deviceConfigurationModel);
-                    simpMessagingTemplate.convertAndSend("/device/device/" + deviceSerial, statusChange(status));
+                    simpMessagingTemplate.convertAndSend("/device/device/" + deviceSerial, deviceService.statusChange(status));
                 }
 
                 return true;
@@ -112,22 +112,6 @@ public class SceneryServiceImpl implements SceneryService {
         simpMessagingTemplate.convertAndSend("/scenery/scenery/" + sceneryID, sceneryConfigurationDao.findSceneryConfigurationModelByIdLike(sceneryID));
     }
 
-    private ObjectNode colorChange(String status, int hue, int bright, int sat) {
-        ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("task", "color change");
-        objectNode.put("status", status);
-        objectNode.put("hue", hue);
-        objectNode.put("brightness", bright);
-        objectNode.put("saturation", sat);
-        return objectNode;
-    }
-
-    private HashMap<String, String> statusChange(String status) {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("task", "status change");
-        map.put("status", status);
-        return map;
-    }
 }
 
 

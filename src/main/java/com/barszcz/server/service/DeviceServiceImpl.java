@@ -70,7 +70,7 @@ public class DeviceServiceImpl implements DeviceService {
             deviceConfigurationModel.setSaturation(hsv.getSaturation());
             deviceConfigurationModel.setBrightness(hsv.getBright());
             deviceConfigurationDao.save(deviceConfigurationModel);
-            simpMessagingTemplate.convertAndSend("/device/device/" + serial, colorChange(status, hsv.getHue(), hsv.getBright(), hsv.getSaturation()));
+            simpMessagingTemplate.convertAndSend("/device/device/" + serial, objectColorChange(status, hsv.getHue(), hsv.getBright(), hsv.getSaturation()));
             return true;
         })
                 .orElseThrow(() -> new ChangeColorException("Change device error"));
@@ -115,14 +115,14 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
 
-    private HashMap<String, String> statusChange(String status) {
+    public HashMap<String, String> statusChange(String status) {
         HashMap<String, String> map = new HashMap<>();
         map.put("task", "status change");
         map.put("status", status);
         return map;
     }
 
-    private ObjectNode colorChange(String status, int hue, int bright, int sat) {
+    public ObjectNode objectColorChange(String status, int hue, int bright, int sat) {
         ObjectNode objectNode = mapper.createObjectNode();
         objectNode.put("task", "color change");
         objectNode.put("status", status);
