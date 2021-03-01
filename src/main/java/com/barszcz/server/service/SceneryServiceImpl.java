@@ -50,13 +50,20 @@ public class SceneryServiceImpl implements SceneryService {
                     System.out.println(e);
                 }
             });
+            simpMessagingTemplate.convertAndSend("/scenery/sceneriesList/" + sceneryConfigurationModel.getRoomID(), sceneryConfigurationDao.findSceneryConfigurationModelsByRoomIDLike(sceneryConfigurationModel.getRoomID()));
             System.out.println(deviceConfigurationInSceneryDao.findAll());
         }
     }
 
-    public List<SceneryConfigurationModel> getSceneries(SceneriesGetRequest sceneriesGetRequest) {
-        return sceneryConfigurationDao.findSceneryConfigurationModelsByRoomIDLike(sceneriesGetRequest.getRoomID());
+    public void deleteScenery(int sceneryID) {
+        sceneryConfigurationDao.findSceneryConfigurationModelByIdLike(sceneryID).ifPresent(scenery->{
+            sceneryConfigurationDao.delete(scenery);
+            simpMessagingTemplate.convertAndSend("/scenery/sceneriesList/" + scenery.getRoomID(), sceneryConfigurationDao.findSceneryConfigurationModelsByRoomIDLike(scenery.getRoomID()));
+        });
+        deviceConfigurationInSceneryDao.deleteAllBySceneryIDLike(sceneryID);
+        System.out.println("Deleted scenery with id: " + sceneryID);
     }
+
 
     public void changeSceneryStatus(int sceneryID, SceneryConfigurationModel sceneryConfigurationModel) throws Exception {
         String status = sceneryConfigurationModel.getSceneryStatus();
@@ -121,6 +128,8 @@ public class SceneryServiceImpl implements SceneryService {
             });
         });
     }
+
+
 
 
 }
