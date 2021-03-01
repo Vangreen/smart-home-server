@@ -1,6 +1,7 @@
 package com.barszcz.server.service;
 
 import com.barszcz.server.dao.DeviceConfigurationDao;
+import com.barszcz.server.dao.DeviceConfigurationInSceneryDao;
 import com.barszcz.server.dao.UnassignedDeviceDao;
 import com.barszcz.server.entity.DeviceConfigurationModel;
 import com.barszcz.server.entity.Hsv;
@@ -27,6 +28,7 @@ public class DeviceServiceImpl implements DeviceService {
     private SimpMessagingTemplate simpMessagingTemplate;
     private ScheduleDelayTask scheduleDelayTask;
     private SceneryService sceneryService;
+    private DeviceConfigurationInSceneryDao deviceConfigurationInSceneryDao;
 
     public List<UnassignedDeviceModel> findAll() {
         return (List<UnassignedDeviceModel>) unassignedDeviceDao.findAll();
@@ -109,6 +111,7 @@ public class DeviceServiceImpl implements DeviceService {
     public void deleteDevice(int serial) {
         deviceConfigurationDao.deleteBySerialLike(serial);
         System.out.println("deleted device with serial:" + serial);
+        deviceConfigurationInSceneryDao.deleteDeviceConfigurationInSceneryModelsByDeviceSerialLike(serial);
         simpMessagingTemplate.convertAndSend("/device/device/" + serial, new SimpleResponse("doesnt exists"));
     }
 
