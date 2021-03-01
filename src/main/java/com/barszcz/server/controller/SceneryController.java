@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,21 +31,20 @@ public class SceneryController {
         sceneryService.addScenery(sceneryCreation);
     }
 
-    @PostMapping(path = "/getSceneries")
-    public List<SceneryConfigurationModel> getSceneries(@RequestBody SceneriesGetRequest sceneriesGetRequest){
-        return sceneryService.getSceneries(sceneriesGetRequest);
-    }
-
     @DeleteMapping(path = "/deleteScenery/{sceneryID}")
     public void deleteScenery(@PathVariable int sceneryID){
-        sceneryConfigurationDao.deleteAllByIdLike(sceneryID);
-        deviceConfigurationInSceneryDao.deleteAllBySceneryIDLike(sceneryID);
-        System.out.println("Deleted scenery with id: " + sceneryID);
+        sceneryService.deleteScenery(sceneryID);
+
     }
 
     @MessageMapping("/changeSceneryStatus/{sceneryID}")
     public void changeSceneryStatus(@DestinationVariable int sceneryID, @Payload SceneryConfigurationModel sceneryConfigurationModel) throws Exception {
         sceneryService.changeSceneryStatus(sceneryID, sceneryConfigurationModel);
+    }
+
+    @SubscribeMapping("/sceneriesList/{roomID}")
+    public List<SceneryConfigurationModel> getSceneriesList(@DestinationVariable int roomID){
+        return sceneryConfigurationDao.findSceneryConfigurationModelsByRoomIDLike(roomID);
     }
 
 }

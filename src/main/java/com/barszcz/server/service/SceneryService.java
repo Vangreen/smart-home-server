@@ -11,9 +11,9 @@ public interface SceneryService {
 
     void addScenery(SceneryCreation sceneryCreation);
 
-    List<SceneryConfigurationModel> getSceneries(SceneriesGetRequest sceneriesGetRequest);
-
     void changeSceneryStatus(int sceneryID, SceneryConfigurationModel sceneryConfigurationModel) throws Exception;
 
     void validateSceneryByDeviceStatus(int deviceSerial, String deviceStatus, Hsv hsv, int roomID);
+
+    void deleteScenery(int sceneryID);
 }
