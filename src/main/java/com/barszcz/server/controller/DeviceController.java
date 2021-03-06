@@ -3,6 +3,7 @@ package com.barszcz.server.controller;
 import com.barszcz.server.dao.DeviceConfigurationDao;
 import com.barszcz.server.entity.DeviceConfigurationModel;
 import com.barszcz.server.entity.Hsv;
+import com.barszcz.server.entity.Requests.ChangeDeviceStatusRequest;
 import com.barszcz.server.entity.Requests.RenameDeviceRequest;
 import com.barszcz.server.entity.UnassignedDeviceModel;
 import com.barszcz.server.service.DeviceService;
@@ -74,10 +75,8 @@ public class DeviceController {
     }
 
     @MessageMapping("/changeDeviceStatus/{serial}")
-    public void changeDeviceStatus(@DestinationVariable("serial") int serial, @Payload String payload) throws Exception {
-        JSONObject jsonObject = jsonService.parse(payload);
-        String status = jsonService.getString(jsonObject, STATUS_VALUE);
-        deviceService.changeDeviceStatus(serial, status);
+    public void changeDeviceStatus(@DestinationVariable("serial") int serial, @Payload ChangeDeviceStatusRequest changeDeviceStatusRequest) throws Exception {
+        deviceService.changeDeviceStatus(serial, changeDeviceStatusRequest);
     }
 
     @MessageMapping("/changeDeviceColor/{serial}")

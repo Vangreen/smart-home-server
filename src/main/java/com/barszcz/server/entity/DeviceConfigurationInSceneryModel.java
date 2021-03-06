@@ -30,4 +30,10 @@ public class DeviceConfigurationInSceneryModel {
 
     @Column(name = "state", nullable = false)
     String deviceState;
+
+    @Column(name= "floating_status", nullable = false)
+    String floatingStatus;
+
+    @Column(name= "floating_speed", nullable = false)
+    int floatingSpeed;
 }

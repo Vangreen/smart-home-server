@@ -1,10 +1,8 @@
 package com.barszcz.server.entity.Requests;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Setter
-@Getter
+@Data
 public class SceneriesGetRequest {     // zrobione bo potem tu będzie user
     private int roomID;
 }

@@ -45,6 +45,8 @@ public class SceneryServiceImpl implements SceneryService {
                     deviceConfigurationInSceneryModel.setSaturation(device.getSaturation());
                     deviceConfigurationInSceneryModel.setBrightness(device.getBrightness());
                     deviceConfigurationInSceneryModel.setDeviceState(device.getDeviceStatus());
+                    deviceConfigurationInSceneryModel.setFloatingStatus(device.getFloatingStatus());
+                    deviceConfigurationInSceneryModel.setFloatingSpeed(device.getFloatingSpeed());
                     deviceConfigurationInSceneryDao.save(deviceConfigurationInSceneryModel);
                 } catch (Exception e) {
                     System.out.println(e);
@@ -103,11 +105,11 @@ public class SceneryServiceImpl implements SceneryService {
                     deviceConfigurationModel.setSaturation(deviceSat);
                     deviceConfigurationModel.setBrightness(deviceBright);
                     deviceConfigurationDao.save(deviceConfigurationModel);
-                    simpMessagingTemplate.convertAndSend("/device/device/" + deviceSerial, new ColorChangeResponse(device.getDeviceState(), deviceHue, deviceBright, deviceSat));
+                    simpMessagingTemplate.convertAndSend("/device/device/" + deviceSerial, new ColorChangeResponse(device.getDeviceState(), deviceHue, deviceBright, deviceSat, device.getFloatingStatus(), device.getFloatingSpeed()));
                 } else {
                     deviceConfigurationModel.setDeviceStatus(status);
                     deviceConfigurationDao.save(deviceConfigurationModel);
-                    simpMessagingTemplate.convertAndSend("/device/device/" + deviceSerial, new StatusChangeResponse(status));
+                    simpMessagingTemplate.convertAndSend("/device/device/" + deviceSerial, new StatusChangeResponse(status, deviceConfigurationModel.getFloatingStatus(), deviceConfigurationModel.getFloatingSpeed()));
                 }
                 return true;
             });

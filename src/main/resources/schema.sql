@@ -6,6 +6,8 @@ create table if not exists configuration (
     bright INT not null,
     state varchar (250) not null,
     status varchar (250) not null,
+    floating_status varchar (250) not null,
+    floating_speed INT not null,
     roomID INT not null,
     device_type varchar (250) not null
 );
@@ -38,5 +40,7 @@ create table if not exists deviceConfigurationInSceneries (
     hue INT not null,
     sat INT not null,
     bright INT not null,
-    state varchar (250) not null
+    state varchar (250) not null,
+    floating_status varchar (250) not null,
+    floating_speed int not null
 )

@@ -31,6 +31,12 @@ public class DeviceConfigurationModel {
     @Column(name = "status", nullable = false)
     String deviceConnectionStatus;
 
+    @Column(name= "floating_status", nullable = false)
+    String floatingStatus;
+
+    @Column(name= "floating_speed", nullable = false)
+    int floatingSpeed;
+
     @Column(name = "roomID", nullable = false)
     int roomID;
 

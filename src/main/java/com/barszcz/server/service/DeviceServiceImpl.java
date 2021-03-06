@@ -5,6 +5,7 @@ import com.barszcz.server.dao.DeviceConfigurationInSceneryDao;
 import com.barszcz.server.dao.UnassignedDeviceDao;
 import com.barszcz.server.entity.DeviceConfigurationModel;
 import com.barszcz.server.entity.Hsv;
+import com.barszcz.server.entity.Requests.ChangeDeviceStatusRequest;
 import com.barszcz.server.entity.Requests.RenameDeviceRequest;
 import com.barszcz.server.entity.Responses.ColorChangeResponse;
 import com.barszcz.server.entity.Responses.SimpleResponse;
@@ -46,6 +47,8 @@ public class DeviceServiceImpl implements DeviceService {
         deviceConfigurationModel.setSaturation(0);
         deviceConfigurationModel.setBrightness(100);
         deviceConfigurationModel.setDeviceStatus("On");
+        deviceConfigurationModel.setFloatingStatus("Off");
+        deviceConfigurationModel.setFloatingSpeed(50);
         deviceConfigurationDao.save(deviceConfigurationModel);
         unassignedDeviceDao.deleteBySerialLike(serial);
         simpMessagingTemplate.convertAndSend("/device/device/" + serial, deviceConfigurationModel);
@@ -69,19 +72,22 @@ public class DeviceServiceImpl implements DeviceService {
             deviceConfigurationModel.setSaturation(hsv.getSaturation());
             deviceConfigurationModel.setBrightness(hsv.getBright());
             deviceConfigurationDao.save(deviceConfigurationModel);
-            simpMessagingTemplate.convertAndSend("/device/device/" + serial, new ColorChangeResponse(status, hsv.getHue(), hsv.getBright(), hsv.getSaturation()));
+            simpMessagingTemplate.convertAndSend("/device/device/" + serial, new ColorChangeResponse(status, hsv.getHue(), hsv.getBright(), hsv.getSaturation(), deviceConfigurationModel.getFloatingStatus(), deviceConfigurationModel.getFloatingSpeed()));
             return true;
         })
                 .orElseThrow(() -> new ChangeColorException("Change device error"));
     }
 
-    public void changeDeviceStatus(int serial, String status) throws Exception {
+    public void changeDeviceStatus(int serial, ChangeDeviceStatusRequest changeDeviceStatusRequest) throws Exception {
         System.out.println("state change for device:" + serial);
         deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).map(deviceConfigurationModel -> {
+            String status = changeDeviceStatusRequest.getStatus();
             sceneryService.validateSceneryByDeviceStatus(serial, status, null, deviceConfigurationModel.getRoomID());
             deviceConfigurationModel.setDeviceStatus(status);
+            deviceConfigurationModel.setFloatingStatus(changeDeviceStatusRequest.getFloatingStatus());
+            deviceConfigurationModel.setFloatingSpeed(changeDeviceStatusRequest.getFloatingSpeed());
             deviceConfigurationDao.save(deviceConfigurationModel);
-            simpMessagingTemplate.convertAndSend("/device/device/" + serial, new StatusChangeResponse(status));
+            simpMessagingTemplate.convertAndSend("/device/device/" + serial, new StatusChangeResponse(status, changeDeviceStatusRequest.getFloatingStatus(), changeDeviceStatusRequest.getFloatingSpeed()));
             return true;
         })
                 .orElseThrow(() -> new ChangeDeviceStatusException("Change device error"));
