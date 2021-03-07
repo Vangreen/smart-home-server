@@ -10,4 +10,10 @@ public class Hsv {
     int hue;
     int saturation;
     int bright;
+
+    public Hsv(int hue, int saturation, int bright){
+        this.hue = hue;
+        this.saturation = saturation;
+        this.bright = bright;
+    }
 }

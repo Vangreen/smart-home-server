@@ -5,6 +5,7 @@ import com.barszcz.server.dao.DeviceConfigurationInSceneryDao;
 import com.barszcz.server.dao.UnassignedDeviceDao;
 import com.barszcz.server.entity.DeviceConfigurationModel;
 import com.barszcz.server.entity.Hsv;
+import com.barszcz.server.entity.Requests.ChangeDeviceColorRequest;
 import com.barszcz.server.entity.Requests.ChangeDeviceStatusRequest;
 import com.barszcz.server.entity.Requests.RenameDeviceRequest;
 import com.barszcz.server.entity.Responses.ColorChangeResponse;
@@ -62,17 +63,19 @@ public class DeviceServiceImpl implements DeviceService {
         });
     }
 
-    public void changeDeviceColor(int serial, String status, Hsv hsv) throws Exception {
+    public void changeDeviceColor(int serial, ChangeDeviceColorRequest changeDeviceColorRequest) throws Exception {
         System.out.println("color change for device:" + serial);
-
+        Hsv hsv = new Hsv(changeDeviceColorRequest.getHue(), changeDeviceColorRequest.getSaturation(), changeDeviceColorRequest.getBrightness());
+        String status = changeDeviceColorRequest.getStatus();
         deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).map(deviceConfigurationModel -> {
             sceneryService.validateSceneryByDeviceStatus(serial, status, hsv, deviceConfigurationModel.getRoomID());
             deviceConfigurationModel.setDeviceStatus(status);
             deviceConfigurationModel.setHue(hsv.getHue());
             deviceConfigurationModel.setSaturation(hsv.getSaturation());
             deviceConfigurationModel.setBrightness(hsv.getBright());
+            deviceConfigurationModel.setFloatingStatus(changeDeviceColorRequest.getFloatingStatus());
             deviceConfigurationDao.save(deviceConfigurationModel);
-            simpMessagingTemplate.convertAndSend("/device/device/" + serial, new ColorChangeResponse(status, hsv.getHue(), hsv.getBright(), hsv.getSaturation(), deviceConfigurationModel.getFloatingStatus(), deviceConfigurationModel.getFloatingSpeed()));
+            simpMessagingTemplate.convertAndSend("/device/device/" + serial, new ColorChangeResponse(status, hsv.getHue(), hsv.getBright(), hsv.getSaturation(), changeDeviceColorRequest.getFloatingStatus(), deviceConfigurationModel.getFloatingSpeed()));
             return true;
         })
                 .orElseThrow(() -> new ChangeColorException("Change device error"));
