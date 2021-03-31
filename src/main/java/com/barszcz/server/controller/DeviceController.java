@@ -80,7 +80,7 @@ public class DeviceController {
         deviceService.changeDeviceStatus(serial, status);
     }
 
-    @GetMapping("/changeDeviceStatus/{serial}")
+    @GetMapping("/changeDeviceStatus-http/{serial}")
     public void changeDeviceStatusHttp(@PathVariable("serial") int serial, @RequestBody String payload) throws Exception {
         JSONObject jsonObject = jsonService.parse(payload);
         String status = jsonService.getString(jsonObject, STATUS_VALUE);
