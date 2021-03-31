@@ -25,6 +25,8 @@ public interface DeviceService {
 
     void doesntExist(int serial, String deviceType) throws Exception;
 
+    void changeStatus(int serial);
+
     Object initDevice(int serial);
 
 

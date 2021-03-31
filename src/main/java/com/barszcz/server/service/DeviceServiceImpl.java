@@ -34,6 +34,22 @@ public class DeviceServiceImpl implements DeviceService {
         return (List<UnassignedDeviceModel>) unassignedDeviceDao.findAll();
     }
 
+
+    public void changeStatus(int serial) {
+        deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).ifPresent(device -> {
+                    System.out.println("state change for device:" + serial);
+                    if (device.getDeviceStatus().contains("Off")) {
+                        device.setDeviceStatus("On");
+                    } else if (device.getDeviceStatus().contains("On")) {
+                        device.setDeviceStatus("Off");
+                    }
+                    System.out.println("Change by http device status:" + serial + " to: " + device.getDeviceStatus());
+                    deviceConfigurationDao.save(device);
+                    simpMessagingTemplate.convertAndSend("/device/device/" + serial, new StatusChangeResponse(device.getDeviceStatus()));
+                }
+        );
+    }
+
     public void addDevice(DeviceConfigurationModel device) {
         DeviceConfigurationModel deviceConfigurationModel = new DeviceConfigurationModel();
         int serial = device.getSerial();
@@ -52,8 +68,8 @@ public class DeviceServiceImpl implements DeviceService {
         System.out.println("added device with serial:" + serial);
     }
 
-    public void renameDevice(RenameDeviceRequest renameDeviceRequest){
-        deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(renameDeviceRequest.getDeviceSerial()).map(device->{
+    public void renameDevice(RenameDeviceRequest renameDeviceRequest) {
+        deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(renameDeviceRequest.getDeviceSerial()).map(device -> {
             device.setDeviceName(renameDeviceRequest.getNewDeviceName());
             return deviceConfigurationDao.save(device);
         });
