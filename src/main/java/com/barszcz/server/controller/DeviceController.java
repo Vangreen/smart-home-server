@@ -74,10 +74,15 @@ public class DeviceController {
     }
 
     @MessageMapping("/changeDeviceStatus/{serial}")
-    public void changeDeviceStatus(@DestinationVariable("serial") int serial, @Payload String payload) throws Exception {
+    public void changeDeviceStatus(@DestinationVariable("serial") int serial, @RequestBody String payload) throws Exception {
         JSONObject jsonObject = jsonService.parse(payload);
         String status = jsonService.getString(jsonObject, STATUS_VALUE);
         deviceService.changeDeviceStatus(serial, status);
+    }
+
+    @GetMapping("/changeDeviceStatus-http/{serial}")
+    public void changeDeviceStatusHttp(@PathVariable("serial") int serial) {
+        deviceService.changeStatus(serial);
     }
 
     @MessageMapping("/changeDeviceColor/{serial}")
