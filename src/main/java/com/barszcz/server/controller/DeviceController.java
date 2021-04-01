@@ -33,7 +33,7 @@ public class DeviceController {
 
     @GetMapping(path = "/getDevices")
     public List<DeviceConfigurationModel> getAllDevices(@RequestParam int roomID) {
-        return deviceConfigurationDao.findDeviceConfigurationModelsByRoomIDLike(roomID);
+        return deviceConfigurationDao.findByRoomID(roomID);
     }
 
     @SubscribeMapping("/unassignedDevices")

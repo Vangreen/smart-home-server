@@ -1,24 +1,18 @@
 package com.barszcz.server.dao;
 
 import com.barszcz.server.entity.SceneryConfigurationModel;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-public interface SceneryConfigurationDao extends CrudRepository<SceneryConfigurationModel, Long> {
+public interface SceneryConfigurationDao extends JpaRepository<SceneryConfigurationModel, Integer> {
 
-    List<SceneryConfigurationModel> findSceneryConfigurationModelsByRoomIDLike(int roomId);
+    List<SceneryConfigurationModel> findByRoomID(int roomId);
 
-    Optional<SceneryConfigurationModel> findSceneryConfigurationModelByIdLike(int id);
+    Optional<SceneryConfigurationModel> findBySceneryNameAndId(String sceneryName, int roomID);
 
-    Optional<SceneryConfigurationModel> findSceneryConfigurationModelBySceneryNameLikeAndRoomIDLike(String sceneryName, int roomID);
+    Optional<List<SceneryConfigurationModel>> findBySceneryStatusAndId(String sceneryStatus, int roomID);
 
-    Optional<List<SceneryConfigurationModel>> findSceneryConfigurationModelsBySceneryStatusLikeAndRoomIDLike(String sceneryStatus, int roomID);
-
-    Optional<SceneryConfigurationModel> findSceneryConfigurationModelBySceneryStatusLikeAndRoomIDLike(String sceneryStatus, int roomID);
-
-    @Transactional
-    void deleteAllByIdLike(int sceneryID);
+    Optional<SceneryConfigurationModel> findBySceneryStatusAndRoomID(String sceneryStatus, int roomID);
 }

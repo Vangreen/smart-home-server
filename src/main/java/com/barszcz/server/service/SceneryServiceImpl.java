@@ -4,17 +4,12 @@ import com.barszcz.server.dao.DeviceConfigurationDao;
 import com.barszcz.server.dao.DeviceConfigurationInSceneryDao;
 import com.barszcz.server.dao.SceneryConfigurationDao;
 import com.barszcz.server.entity.*;
-import com.barszcz.server.entity.Requests.SceneriesGetRequest;
 import com.barszcz.server.entity.Responses.ColorChangeResponse;
 import com.barszcz.server.entity.Responses.StatusChangeResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -28,7 +23,7 @@ public class SceneryServiceImpl implements SceneryService {
 
 
     public void addScenery(SceneryCreation sceneryCreation) {
-        if (sceneryConfigurationDao.findSceneryConfigurationModelBySceneryNameLikeAndRoomIDLike(sceneryCreation.getSceneryName(), sceneryCreation.getRoomID()).isEmpty()) {
+        if (sceneryConfigurationDao.findBySceneryNameAndId(sceneryCreation.getSceneryName(), sceneryCreation.getRoomID()).isEmpty()) {
             SceneryConfigurationModel sceneryConfigurationModel = new SceneryConfigurationModel();
             sceneryConfigurationModel.setSceneryName(sceneryCreation.getSceneryName());
             sceneryConfigurationModel.setRoomID(sceneryCreation.getRoomID());
@@ -50,15 +45,15 @@ public class SceneryServiceImpl implements SceneryService {
                     System.out.println(e);
                 }
             });
-            simpMessagingTemplate.convertAndSend("/scenery/sceneriesList/" + sceneryConfigurationModel.getRoomID(), sceneryConfigurationDao.findSceneryConfigurationModelsByRoomIDLike(sceneryConfigurationModel.getRoomID()));
+            simpMessagingTemplate.convertAndSend("/scenery/sceneriesList/" + sceneryConfigurationModel.getRoomID(), sceneryConfigurationDao.findByRoomID(sceneryConfigurationModel.getRoomID()));
             System.out.println(deviceConfigurationInSceneryDao.findAll());
         }
     }
 
     public void deleteScenery(int sceneryID) {
-        sceneryConfigurationDao.findSceneryConfigurationModelByIdLike(sceneryID).ifPresent(scenery->{
+        sceneryConfigurationDao.findById(sceneryID).ifPresent(scenery->{
             sceneryConfigurationDao.delete(scenery);
-            simpMessagingTemplate.convertAndSend("/scenery/sceneriesList/" + scenery.getRoomID(), sceneryConfigurationDao.findSceneryConfigurationModelsByRoomIDLike(scenery.getRoomID()));
+            simpMessagingTemplate.convertAndSend("/scenery/sceneriesList/" + scenery.getRoomID(), sceneryConfigurationDao.findByRoomID(scenery.getRoomID()));
         });
         deviceConfigurationInSceneryDao.deleteAllBySceneryIDLike(sceneryID);
         System.out.println("Deleted scenery with id: " + sceneryID);
@@ -70,7 +65,7 @@ public class SceneryServiceImpl implements SceneryService {
         int sceneryRoomID = sceneryConfigurationModel.getRoomID();
 
         if (status.equals("On")) {
-            sceneryConfigurationDao.findSceneryConfigurationModelsBySceneryStatusLikeAndRoomIDLike(status, sceneryRoomID).map(sceneries -> {
+            sceneryConfigurationDao.findBySceneryStatusAndId(status, sceneryRoomID).map(sceneries -> {
                 sceneries.forEach(scenery -> {
                     scenery.setSceneryStatus("Off");
                     sceneryConfigurationDao.save(scenery);
@@ -80,7 +75,7 @@ public class SceneryServiceImpl implements SceneryService {
             });
         }
 
-        sceneryConfigurationDao.findSceneryConfigurationModelByIdLike(sceneryID).map(scenery -> {
+        sceneryConfigurationDao.findById(sceneryID).map(scenery -> {
                     scenery.setSceneryStatus(status);
                     sceneryConfigurationDao.save(scenery);
                     return scenery.getRoomID();
@@ -90,13 +85,13 @@ public class SceneryServiceImpl implements SceneryService {
         );
 
 
-        List<DeviceConfigurationInSceneryModel> devicesInScenery = deviceConfigurationInSceneryDao.findRoomConfigurationInSceneryModelsBySceneryIDLike(sceneryID);
+        List<DeviceConfigurationInSceneryModel> devicesInScenery = deviceConfigurationInSceneryDao.findById(sceneryID);
         devicesInScenery.forEach(device -> {
             int deviceSerial = device.getDeviceSerial();
             int deviceHue = device.getHue();
             int deviceSat = device.getSaturation();
             int deviceBright = device.getBrightness();
-            deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(deviceSerial).map(deviceConfigurationModel -> {
+            deviceConfigurationDao.findById(deviceSerial).map(deviceConfigurationModel -> {
                 if (status.equals("On")) {
                     deviceConfigurationModel.setDeviceStatus(device.getDeviceState());
                     deviceConfigurationModel.setHue(deviceHue);
@@ -114,12 +109,12 @@ public class SceneryServiceImpl implements SceneryService {
 
 
         });
-        simpMessagingTemplate.convertAndSend("/scenery/scenery/" + sceneryID, sceneryConfigurationDao.findSceneryConfigurationModelByIdLike(sceneryID));
+        simpMessagingTemplate.convertAndSend("/scenery/scenery/" + sceneryID, sceneryConfigurationDao.findById(sceneryID));
     }
 
     public void validateSceneryByDeviceStatus(int deviceSerial, String deviceStatus, Hsv hsv, int roomID) {
-        sceneryConfigurationDao.findSceneryConfigurationModelBySceneryStatusLikeAndRoomIDLike("On", roomID).ifPresent(scenery -> {
-            deviceConfigurationInSceneryDao.findDeviceConfigurationInSceneryModelByDeviceSerialLikeAndSceneryID(deviceSerial, scenery.getId()).ifPresent(device -> {
+        sceneryConfigurationDao.findBySceneryStatusAndRoomID("On", roomID).ifPresent(scenery -> {
+            deviceConfigurationInSceneryDao.findByDeviceSerialAndId(deviceSerial, scenery.getId()).ifPresent(device -> {
                 if (!device.getDeviceState().equals(deviceStatus) || hsv != null && (hsv.getHue() != device.getHue() || hsv.getSaturation() != device.getSaturation() || hsv.getBright() != device.getBrightness())) {
                     scenery.setSceneryStatus("Off");
                     sceneryConfigurationDao.save(scenery);

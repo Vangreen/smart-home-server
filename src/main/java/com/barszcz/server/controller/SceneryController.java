@@ -2,8 +2,6 @@ package com.barszcz.server.controller;
 
 import com.barszcz.server.dao.DeviceConfigurationInSceneryDao;
 import com.barszcz.server.dao.SceneryConfigurationDao;
-import com.barszcz.server.entity.DeviceConfigurationInSceneryModel;
-import com.barszcz.server.entity.Requests.SceneriesGetRequest;
 import com.barszcz.server.entity.SceneryConfigurationModel;
 import com.barszcz.server.entity.SceneryCreation;
 import com.barszcz.server.service.SceneryService;
@@ -44,7 +42,7 @@ public class SceneryController {
 
     @SubscribeMapping("/sceneriesList/{roomID}")
     public List<SceneryConfigurationModel> getSceneriesList(@DestinationVariable int roomID){
-        return sceneryConfigurationDao.findSceneryConfigurationModelsByRoomIDLike(roomID);
+        return sceneryConfigurationDao.findByRoomID(roomID);
     }
 
 }

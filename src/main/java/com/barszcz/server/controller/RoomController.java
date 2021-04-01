@@ -41,7 +41,7 @@ public class RoomController {
 
     @DeleteMapping(path = "/deleteRoom/{id}")
     public void deleteDevice(@PathVariable("id") int id) {
-        roomConfigurationDao.deleteRoomConfigurationModelByIdLike(id);
+        roomConfigurationDao.deleteById(id);
         System.out.println("deleted room with id:" + id);
         roomService.deleteRoom(id);
     }

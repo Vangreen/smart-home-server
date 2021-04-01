@@ -5,10 +5,7 @@ import com.barszcz.server.dao.RoomConfigurationDao;
 import com.barszcz.server.entity.DeviceConfigurationModel;
 import com.barszcz.server.entity.Responses.SimpleResponse;
 import com.barszcz.server.entity.RoomConfigurationModel;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -36,20 +33,20 @@ public class RoomServiceImpl implements RoomService {
 
     public void deleteRoom(int roomID) {
         List<DeviceConfigurationModel> devices;
-        devices = deviceConfigurationDao.findDeviceConfigurationModelsByRoomIDLike(roomID);
+        devices = deviceConfigurationDao.findByRoomID(roomID);
         devices.forEach(device -> {
             int serial = device.getSerial();
-            deviceConfigurationDao.deleteBySerialLike(serial);
+            deviceConfigurationDao.deleteBySerial(serial);
             System.out.println("deleted device with serial:" + serial);
             simpMessagingTemplate.convertAndSend("/device/device/" + serial, new SimpleResponse("doesnt exists"));
         });
-        roomConfigurationDao.deleteRoomConfigurationModelByIdLike(roomID);
+        roomConfigurationDao.deleteById(roomID);
         simpMessagingTemplate.convertAndSend("/rooms/rooms", roomConfigurationDao.findAll());
     }
 
 
     public void editName(String roomName, int id) throws Exception {
-        roomConfigurationDao.findRoomConfigurationModelByIdLike(id).map(deviceConfigurationModel -> {
+        roomConfigurationDao.findById(id).map(deviceConfigurationModel -> {
                     deviceConfigurationModel.setRoomName(roomName);
                     return roomConfigurationDao.save(deviceConfigurationModel);
                 }

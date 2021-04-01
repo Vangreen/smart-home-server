@@ -1,23 +1,20 @@
 package com.barszcz.server.dao;
 
 import com.barszcz.server.entity.DeviceConfigurationModel;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
-public interface DeviceConfigurationDao extends CrudRepository<DeviceConfigurationModel, Long> {
+public interface DeviceConfigurationDao extends JpaRepository<DeviceConfigurationModel, Integer> {
 
-    Optional<DeviceConfigurationModel> findDeviceConfigurationModelBySerialLike(int serial);
 
-    List<DeviceConfigurationModel> findDeviceConfigurationModelsByRoomIDLike(int room);
+    List<DeviceConfigurationModel> findByRoomID(int room);
 
 
     @Transactional
-    void deleteBySerialLike(int serial);
-
+    void deleteBySerial(int serial);
 
 }

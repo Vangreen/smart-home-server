@@ -36,7 +36,7 @@ public class DeviceServiceImpl implements DeviceService {
 
 
     public void changeStatus(int serial) {
-        deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).ifPresent(device -> {
+        deviceConfigurationDao.findById(serial).ifPresent(device -> {
                     System.out.println("state change for device:" + serial);
                     if (device.getDeviceStatus().contains("Off")) {
                         device.setDeviceStatus("On");
@@ -63,13 +63,13 @@ public class DeviceServiceImpl implements DeviceService {
         deviceConfigurationModel.setBrightness(100);
         deviceConfigurationModel.setDeviceStatus("On");
         deviceConfigurationDao.save(deviceConfigurationModel);
-        unassignedDeviceDao.deleteBySerialLike(serial);
+        unassignedDeviceDao.deleteById(serial);
         simpMessagingTemplate.convertAndSend("/device/device/" + serial, deviceConfigurationModel);
         System.out.println("added device with serial:" + serial);
     }
 
     public void renameDevice(RenameDeviceRequest renameDeviceRequest) {
-        deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(renameDeviceRequest.getDeviceSerial()).map(device -> {
+        deviceConfigurationDao.findById(renameDeviceRequest.getDeviceSerial()).map(device -> {
             device.setDeviceName(renameDeviceRequest.getNewDeviceName());
             return deviceConfigurationDao.save(device);
         });
@@ -78,7 +78,7 @@ public class DeviceServiceImpl implements DeviceService {
     public void changeDeviceColor(int serial, String status, Hsv hsv) throws Exception {
         System.out.println("color change for device:" + serial);
 
-        deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).map(deviceConfigurationModel -> {
+        deviceConfigurationDao.findById(serial).map(deviceConfigurationModel -> {
             sceneryService.validateSceneryByDeviceStatus(serial, status, hsv, deviceConfigurationModel.getRoomID());
             deviceConfigurationModel.setDeviceStatus(status);
             deviceConfigurationModel.setHue(hsv.getHue());
@@ -93,7 +93,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     public void changeDeviceStatus(int serial, String status) throws Exception {
         System.out.println("state change for device:" + serial);
-        deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).map(deviceConfigurationModel -> {
+        deviceConfigurationDao.findById(serial).map(deviceConfigurationModel -> {
             sceneryService.validateSceneryByDeviceStatus(serial, status, null, deviceConfigurationModel.getRoomID());
             deviceConfigurationModel.setDeviceStatus(status);
             deviceConfigurationDao.save(deviceConfigurationModel);
@@ -116,8 +116,8 @@ public class DeviceServiceImpl implements DeviceService {
 
     public Object initDevice(int serial) {
         System.out.println("new device subscribed for serial:" + serial);
-        if (deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial).isPresent()) {
-            return deviceConfigurationDao.findDeviceConfigurationModelBySerialLike(serial);
+        if (deviceConfigurationDao.findById(serial).isPresent()) {
+            return deviceConfigurationDao.findById(serial);
         } else {
             return new SimpleResponse("doesnt exists");
         }
@@ -125,7 +125,7 @@ public class DeviceServiceImpl implements DeviceService {
 
 
     public void deleteDevice(int serial) {
-        deviceConfigurationDao.deleteBySerialLike(serial);
+        deviceConfigurationDao.deleteBySerial(serial);
         System.out.println("deleted device with serial:" + serial);
         deviceConfigurationInSceneryDao.deleteDeviceConfigurationInSceneryModelsByDeviceSerialLike(serial);
         simpMessagingTemplate.convertAndSend("/device/device/" + serial, new SimpleResponse("doesnt exists"));
