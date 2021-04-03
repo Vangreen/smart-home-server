@@ -1,18 +1,18 @@
 package com.barszcz.server.dao;
 
 import com.barszcz.server.entity.DeviceConfigurationInSceneryModel;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-public interface DeviceConfigurationInSceneryDao extends CrudRepository<DeviceConfigurationInSceneryModel, Long> {
+public interface DeviceConfigurationInSceneryDao extends JpaRepository<DeviceConfigurationInSceneryModel, Integer> {
 
-    List<DeviceConfigurationInSceneryModel> findRoomConfigurationInSceneryModelsBySceneryIDLike(int sceneryID);
+    List<DeviceConfigurationInSceneryModel> findById(int sceneryID);
 
-    Optional<DeviceConfigurationInSceneryModel> findDeviceConfigurationInSceneryModelByDeviceSerialLikeAndSceneryID(int deviceSerial, int sceneryID);
 
+    Optional<DeviceConfigurationInSceneryModel> findByDeviceSerialAndId(int deviceSerial, int sceneryID);
 
     @Transactional
     void deleteAllBySceneryIDLike(int sceneryID);
