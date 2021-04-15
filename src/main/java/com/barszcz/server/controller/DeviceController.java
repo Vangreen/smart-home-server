@@ -73,6 +73,14 @@ public class DeviceController {
         deviceService.doesntExist(serial, deviceType);
     }
 
+    @MessageMapping("/updateDeviceStatus")
+    public void updateDeviceStatus(@Payload String payload) throws Exception {
+        JSONObject jsonObject = jsonService.parse(payload);
+        int serial = jsonService.getInt(jsonObject, SERIAL_VALUE);
+        String deviceType = jsonService.getString(jsonObject, DEVICE_TYPE_VALUE);
+        deviceService.updateDeviceStatus(serial, deviceType);
+    }
+
     @MessageMapping("/changeDeviceStatus/{serial}")
     public void changeDeviceStatus(@DestinationVariable("serial") int serial, @RequestBody String payload) throws Exception {
         JSONObject jsonObject = jsonService.parse(payload);

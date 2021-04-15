@@ -104,6 +104,18 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
 
+    public void updateDeviceStatus(int serial, String status) throws Exception {
+        System.out.println("state change for device:" + serial);
+        deviceConfigurationDao.findById(serial).map(deviceConfigurationModel -> {
+            sceneryService.validateSceneryByDeviceStatus(serial, status, null, deviceConfigurationModel.getRoomID());
+            deviceConfigurationModel.setDeviceStatus(status);
+            deviceConfigurationDao.save(deviceConfigurationModel);
+            return true;
+        })
+                .orElseThrow(() -> new ChangeDeviceStatusException("Change device error"));
+    }
+
+
     public void doesntExist(int serial, String deviceType) {
         UnassignedDeviceModel unassignedDeviceModel = new UnassignedDeviceModel();
         unassignedDeviceModel.setSerial(serial);
