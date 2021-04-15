@@ -23,7 +23,7 @@ public class SceneryServiceImpl implements SceneryService {
 
 
     public void addScenery(SceneryCreation sceneryCreation) {
-        if (sceneryConfigurationDao.findBySceneryNameAndId(sceneryCreation.getSceneryName(), sceneryCreation.getRoomID()).isEmpty()) {
+        if (!sceneryConfigurationDao.findBySceneryNameAndId(sceneryCreation.getSceneryName(), sceneryCreation.getRoomID()).isPresent()) {
             SceneryConfigurationModel sceneryConfigurationModel = new SceneryConfigurationModel();
             sceneryConfigurationModel.setSceneryName(sceneryCreation.getSceneryName());
             sceneryConfigurationModel.setRoomID(sceneryCreation.getRoomID());
