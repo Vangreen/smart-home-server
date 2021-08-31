@@ -93,6 +93,16 @@ public class DeviceController {
         deviceService.changeStatus(serial);
     }
 
+    @GetMapping("/turn-off-all")
+    public void turnOffAll() {
+        deviceService.turnOffAllDevices();
+    }
+
+    @GetMapping("/turn-on-all")
+    public void turnOnAll() {
+        deviceService.turnOnAllDevices();
+    }
+
     @MessageMapping("/changeDeviceColor/{serial}")
     public void changeDeviceColor(@DestinationVariable("serial") int serial, @Payload String payload) throws Exception {
         JSONObject jsonObject = jsonService.parse(payload);

@@ -27,6 +27,10 @@ public interface DeviceService {
 
     void changeStatus(int serial);
 
+    void turnOffAllDevices();
+
+    void turnOnAllDevices();
+
     Object initDevice(int serial);
 
 
