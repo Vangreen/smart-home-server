@@ -47,7 +47,7 @@ public class DeviceServiceImpl implements DeviceService {
                      *  Remove when fixed
                      */
                     if (device.getDeviceStatus().contains("\"")) {
-                        device.setDeviceStatus("On");
+                        log.info("FIXME");
                         if (device.getDeviceStatus().contains("Off")) {
                             device.setDeviceStatus("Off");
                         } else if (device.getDeviceStatus().contains("On")) {
