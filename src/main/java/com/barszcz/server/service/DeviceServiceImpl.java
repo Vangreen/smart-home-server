@@ -41,22 +41,24 @@ public class DeviceServiceImpl implements DeviceService {
         deviceConfigurationDao.findById(serial).ifPresent(device -> {
                     log.info("state change for device:" + serial);
 
-                    if (device.getDeviceStatus().contains("Off")) {
-                        device.setDeviceStatus("On");
-                    } else if (device.getDeviceStatus().contains("On")) {
-                        device.setDeviceStatus("Off");
-                    }
-
                     /*
                      *  TODO Temporary fix
                      *  In device code is bug
                      *  Remove when fixed
                      */
-                    if (device.getDeviceStatus().equals("On\"")) {
+                    if (device.getDeviceStatus().contains("\"")) {
                         device.setDeviceStatus("On");
-                    } else if (device.getDeviceStatus().equals("Off\"")) {
+                        if (device.getDeviceStatus().contains("Off")) {
+                            device.setDeviceStatus("Off");
+                        } else if (device.getDeviceStatus().contains("On")) {
+                            device.setDeviceStatus("On");
+                        }
+                    } else if (device.getDeviceStatus().contains("Off")) {
+                        device.setDeviceStatus("On");
+                    } else if (device.getDeviceStatus().contains("On")) {
                         device.setDeviceStatus("Off");
                     }
+
                     saveAndSend(device);
                 }
         );
