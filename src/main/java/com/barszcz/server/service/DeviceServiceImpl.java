@@ -33,16 +33,28 @@ public class DeviceServiceImpl implements DeviceService {
     private DeviceConfigurationInSceneryDao deviceConfigurationInSceneryDao;
 
     public List<UnassignedDeviceModel> findAll() {
-        return (List<UnassignedDeviceModel>) unassignedDeviceDao.findAll();
+        return unassignedDeviceDao.findAll();
     }
 
 
     public void changeStatus(int serial) {
         deviceConfigurationDao.findById(serial).ifPresent(device -> {
                     log.info("state change for device:" + serial);
+
                     if (device.getDeviceStatus().contains("Off")) {
                         device.setDeviceStatus("On");
                     } else if (device.getDeviceStatus().contains("On")) {
+                        device.setDeviceStatus("Off");
+                    }
+
+                    /*
+                     *  TODO Temporary fix
+                     *  In device code is bug
+                     *  Remove when fixed
+                     */
+                    if (device.getDeviceStatus().equals("On\"")) {
+                        device.setDeviceStatus("On");
+                    } else if (device.getDeviceStatus().equals("Off\"")) {
                         device.setDeviceStatus("Off");
                     }
                     saveAndSend(device);
@@ -95,27 +107,27 @@ public class DeviceServiceImpl implements DeviceService {
         log.info("color change for device:" + serial);
 
         deviceConfigurationDao.findById(serial).map(deviceConfigurationModel -> {
-            sceneryService.validateSceneryByDeviceStatus(serial, status, hsv, deviceConfigurationModel.getRoomID());
-            deviceConfigurationModel.setDeviceStatus(status);
-            deviceConfigurationModel.setHue(hsv.getHue());
-            deviceConfigurationModel.setSaturation(hsv.getSaturation());
-            deviceConfigurationModel.setBrightness(hsv.getBright());
-            deviceConfigurationDao.save(deviceConfigurationModel);
-            simpMessagingTemplate.convertAndSend("/device/device/" + serial, new ColorChangeResponse(status, hsv.getHue(), hsv.getBright(), hsv.getSaturation()));
-            return true;
-        })
+                    sceneryService.validateSceneryByDeviceStatus(serial, status, hsv, deviceConfigurationModel.getRoomID());
+                    deviceConfigurationModel.setDeviceStatus(status);
+                    deviceConfigurationModel.setHue(hsv.getHue());
+                    deviceConfigurationModel.setSaturation(hsv.getSaturation());
+                    deviceConfigurationModel.setBrightness(hsv.getBright());
+                    deviceConfigurationDao.save(deviceConfigurationModel);
+                    simpMessagingTemplate.convertAndSend("/device/device/" + serial, new ColorChangeResponse(status, hsv.getHue(), hsv.getBright(), hsv.getSaturation()));
+                    return true;
+                })
                 .orElseThrow(() -> new ChangeColorException("Change device error"));
     }
 
     public void changeDeviceStatus(int serial, String status) throws Exception {
         log.info("state change for device:" + serial);
         deviceConfigurationDao.findById(serial).map(deviceConfigurationModel -> {
-            sceneryService.validateSceneryByDeviceStatus(serial, status, null, deviceConfigurationModel.getRoomID());
-            deviceConfigurationModel.setDeviceStatus(status);
-            deviceConfigurationDao.save(deviceConfigurationModel);
-            simpMessagingTemplate.convertAndSend("/device/device/" + serial, new StatusChangeResponse(status));
-            return true;
-        })
+                    sceneryService.validateSceneryByDeviceStatus(serial, status, null, deviceConfigurationModel.getRoomID());
+                    deviceConfigurationModel.setDeviceStatus(status);
+                    deviceConfigurationDao.save(deviceConfigurationModel);
+                    simpMessagingTemplate.convertAndSend("/device/device/" + serial, new StatusChangeResponse(status));
+                    return true;
+                })
                 .orElseThrow(() -> new ChangeDeviceStatusException("Change device error"));
     }
 
@@ -123,11 +135,11 @@ public class DeviceServiceImpl implements DeviceService {
     public void updateDeviceStatus(int serial, String status) throws Exception {
         log.info("state change for device:" + serial);
         deviceConfigurationDao.findById(serial).map(deviceConfigurationModel -> {
-            sceneryService.validateSceneryByDeviceStatus(serial, status, null, deviceConfigurationModel.getRoomID());
-            deviceConfigurationModel.setDeviceStatus(status);
-            deviceConfigurationDao.save(deviceConfigurationModel);
-            return true;
-        })
+                    sceneryService.validateSceneryByDeviceStatus(serial, status, null, deviceConfigurationModel.getRoomID());
+                    deviceConfigurationModel.setDeviceStatus(status);
+                    deviceConfigurationDao.save(deviceConfigurationModel);
+                    return true;
+                })
                 .orElseThrow(() -> new ChangeDeviceStatusException("Change device error"));
     }
 
@@ -159,7 +171,7 @@ public class DeviceServiceImpl implements DeviceService {
         simpMessagingTemplate.convertAndSend("/device/device/" + serial, new SimpleResponse("doesnt exists"));
     }
 
-    private void saveAndSend(DeviceConfigurationModel device){
+    private void saveAndSend(DeviceConfigurationModel device) {
         deviceConfigurationDao.save(device);
         simpMessagingTemplate.convertAndSend("/device/device/" + device.getSerial(), new StatusChangeResponse(device.getDeviceStatus()));
         log.info("Change by http device status:" + device.getSerial() + " to: " + device.getDeviceStatus());
