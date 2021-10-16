@@ -1,18 +1,15 @@
 package com.smarthome.server.entity;
 
 import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.*;
 
-
-@Entity
-@Table(name = "unassignedDevices")
+@Document
 @Data
 public class UnassignedDeviceModel {
-    @Id
-    @Column(name = "serial", nullable = false)
-    int serial;
 
-    @Column(name = "device_type", nullable = false)
-    String deviceType;
+    @Id
+    private int serial;
+    private String deviceType;
 }

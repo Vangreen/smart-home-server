@@ -1,13 +1,15 @@
 package com.smarthome.server.controller;
 
-import com.smarthome.server.dao.RoomConfigurationDao;
+import com.smarthome.server.dao.RoomRepository;
 import com.smarthome.server.entity.RoomConfigurationModel;
-import com.smarthome.server.service.JsonObjectService;
 import com.smarthome.server.service.RoomService;
 import lombok.AllArgsConstructor;
-import org.json.JSONObject;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -16,41 +18,30 @@ import java.util.List;
 @AllArgsConstructor
 public class RoomController {
 
-    private final static String ROOM_NAME = "roomName";
-    private final static String MAIN_VALUE = "main";
-    private final static String ID_VALUE = "id";
-
-    private RoomConfigurationDao roomConfigurationDao;
+    private RoomRepository roomRepository;
     private RoomService roomService;
-    private JsonObjectService jsonService;
 
 
     @SubscribeMapping("/rooms")
     public List<RoomConfigurationModel> findRooms() {
-        return (List<RoomConfigurationModel>) roomConfigurationDao.findAll();
+        return roomRepository.findAll();
 
     }
 
     @PostMapping(path = "/addRoom")
-    public void addRoom(@RequestBody String body) throws Exception {
-        JSONObject jsonObject = jsonService.parse(body);
-        String roomName = jsonService.getString(jsonObject, ROOM_NAME);
-        String main = jsonService.getString(jsonObject, MAIN_VALUE);
-        roomService.addRoom(roomName, main);
+    public void addRoom(@RequestBody RoomConfigurationModel room) {
+        roomService.addRoom(room);
     }
 
     @DeleteMapping(path = "/deleteRoom/{id}")
     public void deleteDevice(@PathVariable("id") int id) {
-        roomConfigurationDao.deleteById(id);
+        roomRepository.deleteById(id);
         System.out.println("deleted room with id:" + id);
         roomService.deleteRoom(id);
     }
 
     @PostMapping(path = "/renameRoom")
-    public void editNameRoom(@RequestBody String body) throws Exception {
-        JSONObject jsonObject = jsonService.parse(body);
-        int id = jsonService.getInt(jsonObject, ID_VALUE);
-        String name = jsonService.getString(jsonObject, ROOM_NAME);
-        roomService.editName(name, id);
+    public void editNameRoom(@RequestBody RoomConfigurationModel room) throws Exception {
+        roomService.editName(room);
     }
 }

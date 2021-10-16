@@ -1,8 +1,8 @@
 package com.smarthome.server.scheduler;
 
-import com.smarthome.server.dao.UnassignedDeviceDao;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.smarthome.server.dao.UnassignedDeviceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -18,11 +18,11 @@ public class ScheduleDelayTask {
     private ObjectMapper mapper;
 
     ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-    private UnassignedDeviceDao unassignedDeviceDao;
+    private UnassignedDeviceRepository unassignedDeviceRepository;
     private SimpMessagingTemplate simpMessagingTemplate;
 
-    public ScheduleDelayTask(UnassignedDeviceDao unassignedDeviceDao, SimpMessagingTemplate simpMessagingTemplate) {
-        this.unassignedDeviceDao = unassignedDeviceDao;
+    public ScheduleDelayTask(UnassignedDeviceRepository unassignedDeviceRepository, SimpMessagingTemplate simpMessagingTemplate) {
+        this.unassignedDeviceRepository = unassignedDeviceRepository;
         this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
@@ -31,17 +31,15 @@ public class ScheduleDelayTask {
     }
 
     public void deleteUnassignedDevices(int serial) {
-        Runnable task = new Runnable() {
-            public void run() {
-                System.out.println("run");
-                unassignedDeviceDao.findById(serial).ifPresent(device -> {
-                            System.out.println("wykonano");
-                            unassignedDeviceDao.deleteById(device.getSerial());
-                            simpMessagingTemplate.convertAndSend("/device/device/" + serial, responseObject("doesnt exists"));
-                        }
-                );
+        Runnable task = () -> {
+            System.out.println("run");
+            unassignedDeviceRepository.findById(serial).ifPresent(device -> {
+                        System.out.println("wykonano");
+                        unassignedDeviceRepository.deleteById(device.getSerial());
+                        simpMessagingTemplate.convertAndSend("/device/device/" + serial, responseObject("doesnt exists"));
+                    }
+            );
 
-            }
         };
         delay5minutes(task);
     }

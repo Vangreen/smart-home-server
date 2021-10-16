@@ -1,12 +1,12 @@
 package com.smarthome.server.service;
 
-import org.json.JSONException;
+import com.smarthome.server.entity.RoomConfigurationModel;
 
 public interface RoomService {
 
-    void addRoom(String roomName, String main) throws JSONException;
+    void addRoom(RoomConfigurationModel room);
 
     void deleteRoom(int roomID);
 
-    void editName(String roomName, int id) throws Exception;
+    void editName(RoomConfigurationModel room) throws Exception;
 }

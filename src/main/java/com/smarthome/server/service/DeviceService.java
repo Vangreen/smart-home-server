@@ -1,7 +1,6 @@
 package com.smarthome.server.service;
 
 import com.smarthome.server.entity.DeviceConfigurationModel;
-import com.smarthome.server.entity.Hsv;
 import com.smarthome.server.entity.Requests.RenameDeviceRequest;
 import com.smarthome.server.entity.UnassignedDeviceModel;
 
@@ -17,7 +16,7 @@ public interface DeviceService {
 
     void deleteDevice(int serial);
 
-    void changeDeviceColor(int serial, String status, Hsv hsv) throws Exception;
+    void changeDeviceColor(int serial, DeviceConfigurationModel device) throws Exception;
 
     void changeDeviceStatus(int serial, String status) throws Exception;
 

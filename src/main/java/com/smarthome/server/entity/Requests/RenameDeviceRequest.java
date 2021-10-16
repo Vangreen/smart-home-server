@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RenameDeviceRequest {
-    public int deviceSerial;
-    public String newDeviceName;
+    private int deviceSerial;
+    private String newDeviceName;
 }

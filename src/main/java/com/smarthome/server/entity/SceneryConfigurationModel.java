@@ -1,31 +1,20 @@
 package com.smarthome.server.entity;
 
 import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.*;
 
-@Entity
-@Table(name = "sceneryConfiguration")
+@Document
 @Data
 public class SceneryConfigurationModel {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
-    int id;
-
-//    @Column(name = "user_id", nullable = false)
-//    int userID;
-
-    @Column(name = "room_id", nullable = false)
-    int roomID;
-
-    @Column(name = "scenery_name", nullable = false)
-    String sceneryName;
-
-    @Column(name = "logo", nullable = false)
-    String logo;
-
-    @Column(name = "scenery_status", nullable = false)
-    String sceneryStatus;
+    private int id;
+    //    private int userID;
+    private int roomID;
+    private String sceneryName;
+    private String logo;
+    private String sceneryStatus;
 
 }

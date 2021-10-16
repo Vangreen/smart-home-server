@@ -1,7 +1,7 @@
 package com.smarthome.server.service;
 
-import com.smarthome.server.dao.DeviceConfigurationDao;
-import com.smarthome.server.dao.RoomConfigurationDao;
+import com.smarthome.server.dao.DeviceRepository;
+import com.smarthome.server.dao.RoomRepository;
 import com.smarthome.server.entity.DeviceConfigurationModel;
 import com.smarthome.server.entity.Responses.SimpleResponse;
 import com.smarthome.server.entity.RoomConfigurationModel;
@@ -16,45 +16,42 @@ import java.util.List;
 @AllArgsConstructor
 public class RoomServiceImpl implements RoomService {
 
-    private DeviceConfigurationDao deviceConfigurationDao;
+    private DeviceRepository deviceRepository;
     private SimpMessagingTemplate simpMessagingTemplate;
-    private RoomConfigurationDao roomConfigurationDao;
+    private RoomRepository roomRepository;
 
 
-    public void addRoom(String roomName, String main) {
-        RoomConfigurationModel roomConfigurationModel = new RoomConfigurationModel();
-        roomConfigurationModel.setRoomName(roomName);
-        roomConfigurationModel.setMain(main);
-        roomConfigurationDao.save(roomConfigurationModel);
-        simpMessagingTemplate.convertAndSend("/rooms/rooms", roomConfigurationDao.findAll());
+    public void addRoom(RoomConfigurationModel room) {
+        roomRepository.save(room);
+        simpMessagingTemplate.convertAndSend("/rooms/rooms", roomRepository.findAll());
 
     }
 
 
     public void deleteRoom(int roomID) {
         List<DeviceConfigurationModel> devices;
-        devices = deviceConfigurationDao.findByRoomID(roomID);
+        devices = deviceRepository.findByRoomID(roomID);
         devices.forEach(device -> {
             int serial = device.getSerial();
-            deviceConfigurationDao.deleteBySerial(serial);
+            deviceRepository.deleteBySerial(serial);
             System.out.println("deleted device with serial:" + serial);
             simpMessagingTemplate.convertAndSend("/device/device/" + serial, new SimpleResponse("doesnt exists"));
         });
-        roomConfigurationDao.deleteById(roomID);
-        simpMessagingTemplate.convertAndSend("/rooms/rooms", roomConfigurationDao.findAll());
+        roomRepository.deleteById(roomID);
+        simpMessagingTemplate.convertAndSend("/rooms/rooms", roomRepository.findAll());
     }
 
 
-    public void editName(String roomName, int id) throws Exception {
-        roomConfigurationDao.findById(id).map(deviceConfigurationModel -> {
-                    deviceConfigurationModel.setRoomName(roomName);
-                    return roomConfigurationDao.save(deviceConfigurationModel);
+    public void editName(RoomConfigurationModel room) throws Exception {
+        roomRepository.findById(room.getId()).map(deviceConfigurationModel -> {
+                    deviceConfigurationModel.setRoomName(room.getRoomName());
+                    return roomRepository.save(deviceConfigurationModel);
                 }
         ).orElseThrow(
                 Exception::new
         );
-        System.out.println("Rename room with id:" + id);
-        simpMessagingTemplate.convertAndSend("/rooms/rooms", roomConfigurationDao.findAll());
+        System.out.println("Rename room with id:" + room.getId());
+        simpMessagingTemplate.convertAndSend("/rooms/rooms", roomRepository.findAll());
     }
 
 }

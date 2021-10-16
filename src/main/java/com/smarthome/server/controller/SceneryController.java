@@ -1,7 +1,6 @@
 package com.smarthome.server.controller;
 
-import com.smarthome.server.dao.DeviceConfigurationInSceneryDao;
-import com.smarthome.server.dao.SceneryConfigurationDao;
+import com.smarthome.server.dao.SceneryRepository;
 import com.smarthome.server.entity.SceneryConfigurationModel;
 import com.smarthome.server.entity.SceneryCreation;
 import com.smarthome.server.service.SceneryService;
@@ -10,7 +9,11 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -21,16 +24,15 @@ public class SceneryController {
 
 
     private SceneryService sceneryService;
-    private SceneryConfigurationDao sceneryConfigurationDao;
-    private DeviceConfigurationInSceneryDao deviceConfigurationInSceneryDao;
+    private SceneryRepository sceneryRepository;
 
     @PostMapping(path = "/addScenery")
-    public void addScenery(@RequestBody SceneryCreation sceneryCreation){
+    public void addScenery(@RequestBody SceneryCreation sceneryCreation) {
         sceneryService.addScenery(sceneryCreation);
     }
 
     @DeleteMapping(path = "/deleteScenery/{sceneryID}")
-    public void deleteScenery(@PathVariable int sceneryID){
+    public void deleteScenery(@PathVariable int sceneryID) {
         sceneryService.deleteScenery(sceneryID);
 
     }
@@ -41,8 +43,8 @@ public class SceneryController {
     }
 
     @SubscribeMapping("/sceneriesList/{roomID}")
-    public List<SceneryConfigurationModel> getSceneriesList(@DestinationVariable int roomID){
-        return sceneryConfigurationDao.findByRoomID(roomID);
+    public List<SceneryConfigurationModel> getSceneriesList(@DestinationVariable int roomID) {
+        return sceneryRepository.findByRoomID(roomID);
     }
 
 }

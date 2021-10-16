@@ -1,9 +1,11 @@
-package com.smarthome.server.dao;
+package com.smarthome.server.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.web.socket.config.annotation.*;
-import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 
 @Configuration
@@ -13,7 +15,7 @@ public class ConfigurationWebSocketDao implements WebSocketMessageBrokerConfigur
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/mywebsocket").setAllowedOrigins("*").withSockJS();
+        registry.addEndpoint("/mywebsocket").setAllowedOriginPatterns("*").withSockJS();
     }
 
     @Override

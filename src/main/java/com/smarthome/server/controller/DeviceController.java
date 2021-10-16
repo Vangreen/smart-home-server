@@ -1,20 +1,21 @@
 package com.smarthome.server.controller;
 
-import com.smarthome.server.dao.DeviceConfigurationDao;
+import com.smarthome.server.dao.DeviceRepository;
 import com.smarthome.server.entity.DeviceConfigurationModel;
-import com.smarthome.server.entity.Hsv;
 import com.smarthome.server.entity.Requests.RenameDeviceRequest;
 import com.smarthome.server.entity.UnassignedDeviceModel;
 import com.smarthome.server.service.DeviceService;
-import com.smarthome.server.service.JsonObjectService;
-import com.smarthome.server.service.SceneryService;
 import lombok.AllArgsConstructor;
-import org.json.JSONObject;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -22,18 +23,12 @@ import java.util.List;
 @AllArgsConstructor
 public class DeviceController {
 
-    private final static String SERIAL_VALUE = "serial";
-    private final static String STATUS_VALUE = "status";
-    private static final String DEVICE_TYPE_VALUE = "deviceType";
-
-    private DeviceConfigurationDao deviceConfigurationDao;
-    private JsonObjectService jsonService;
-    private DeviceService deviceService;
-    private SceneryService sceneryService;
+    private final DeviceRepository deviceRepository;
+    private final DeviceService deviceService;
 
     @GetMapping(path = "/getDevices")
     public List<DeviceConfigurationModel> getAllDevices(@RequestParam int roomID) {
-        return deviceConfigurationDao.findByRoomID(roomID);
+        return deviceRepository.findByRoomID(roomID);
     }
 
     @SubscribeMapping("/unassignedDevices")
@@ -42,9 +37,8 @@ public class DeviceController {
     }
 
     @PostMapping(path = "/addDevice")
-    public void addDevice(@RequestBody String body) throws Exception {
-        JSONObject jsonObject = jsonService.parse(body);
-        deviceService.addDevice(jsonService.bodyToDevice(jsonObject));
+    public void addDevice(@RequestBody DeviceConfigurationModel device) {
+        deviceService.addDevice(device);
 
     }
 
@@ -54,10 +48,8 @@ public class DeviceController {
     }
 
     @PostMapping(path = "/deleteDevice")
-    public void deleteDevice(@RequestBody String body) throws Exception {
-        JSONObject jsonObject = jsonService.parse(body);
-        int serial = jsonService.getInt(jsonObject, "serial");
-        deviceService.deleteDevice(serial);
+    public void deleteDevice(@RequestBody DeviceConfigurationModel device) {
+        deviceService.deleteDevice(device.getSerial());
     }
 
     @SubscribeMapping("/device/{serial}")
@@ -66,26 +58,18 @@ public class DeviceController {
     }
 
     @MessageMapping("/doesntExists")
-    public void doesntExists(@Payload String payload) throws Exception {
-        JSONObject jsonObject = jsonService.parse(payload);
-        int serial = jsonService.getInt(jsonObject, SERIAL_VALUE);
-        String deviceType = jsonService.getString(jsonObject, DEVICE_TYPE_VALUE);
-        deviceService.doesntExist(serial, deviceType);
+    public void doesntExists(@Payload DeviceConfigurationModel device) throws Exception {
+        deviceService.doesntExist(device.getSerial(), device.getDeviceType());
     }
 
     @MessageMapping("/updateDeviceStatus")
-    public void updateDeviceStatus(@Payload String payload) throws Exception {
-        JSONObject jsonObject = jsonService.parse(payload);
-        int serial = jsonService.getInt(jsonObject, SERIAL_VALUE);
-        String deviceType = jsonService.getString(jsonObject, DEVICE_TYPE_VALUE);
-        deviceService.updateDeviceStatus(serial, deviceType);
+    public void updateDeviceStatus(@Payload DeviceConfigurationModel device) throws Exception {
+        deviceService.updateDeviceStatus(device.getSerial(), device.getDeviceType());
     }
 
     @MessageMapping("/changeDeviceStatus/{serial}")
-    public void changeDeviceStatus(@DestinationVariable("serial") int serial, @RequestBody String payload) throws Exception {
-        JSONObject jsonObject = jsonService.parse(payload);
-        String status = jsonService.getString(jsonObject, STATUS_VALUE);
-        deviceService.changeDeviceStatus(serial, status);
+    public void changeDeviceStatus(@DestinationVariable("serial") int serial, @RequestBody DeviceConfigurationModel device) throws Exception {
+        deviceService.changeDeviceStatus(serial, device.getDeviceStatus());
     }
 
     //Get mapping because of ios shortcuts app TODO fix in future
@@ -105,12 +89,8 @@ public class DeviceController {
     }
 
     @MessageMapping("/changeDeviceColor/{serial}")
-    public void changeDeviceColor(@DestinationVariable("serial") int serial, @Payload String payload) throws Exception {
-        JSONObject jsonObject = jsonService.parse(payload);
-        String status = jsonService.getString(jsonObject, STATUS_VALUE);
-        Hsv hsv = jsonService.bodyToHsv(jsonObject);
-//        sceneryService.validateScenery(serial, status);
-        deviceService.changeDeviceColor(serial, status, hsv);
+    public void changeDeviceColor(@DestinationVariable("serial") int serial, @Payload DeviceConfigurationModel device) throws Exception {
+        deviceService.changeDeviceColor(serial, device);
     }
 
 

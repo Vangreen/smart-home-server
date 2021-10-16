@@ -12,22 +12,5 @@ public class ServerApplication {
         SpringApplication.run(ServerApplication.class, args);
     }
 
-//    @Bean
-//    public CommandLineRunner demo(DeviceConfigurationDao dao){
-//        return(args) ->{
-//            DeviceConfigurationModel configurationModel = new DeviceConfigurationModel();
-//            configurationModel.setSerial(123457);
-//            configurationModel.setIp("ws://192.168.2.145:81");
-//            configurationModel.setDeviceName("biurko");
-//            configurationModel.setHue(100);
-//            configurationModel.setSat(50);
-//            configurationModel.setBright(50);
-//            configurationModel.setDeviceState("off");
-//            configurationModel.setRoom("pawla");
-//            configurationModel.setDeviceType("ledrgb");
-//            dao.save(configurationModel);
-//        };
-//    }
-
 }
 
