@@ -98,13 +98,13 @@ public class DeviceServiceImpl implements DeviceService {
 
     public void changeDeviceStatus(int serial, String status) throws Exception {
         log.info("state change for device:" + serial);
-        deviceRepository.findBySerial(serial).map(deviceConfigurationModel -> {
-                    sceneryService.validateSceneryByDeviceStatus(serial, status, null, deviceConfigurationModel.getRoomID());
-                    deviceRepository.save(setStatus(deviceConfigurationModel));
-                    simpMessagingTemplate.convertAndSend("/device/device/" + serial, new StatusChangeResponse(status));
-                    return true;
-                })
-                .orElseThrow(() -> new ChangeDeviceStatusException("Change device error"));
+        deviceRepository.findBySerial(serial).map(device -> {
+            setStatus(device);
+            sceneryService.validateSceneryByDeviceStatus(serial, status, null, device.getRoomID());
+            saveAndSend(device);
+            return device;
+        }).orElseThrow(() -> new ChangeDeviceStatusException("Change device error"));
+
     }
 
 
