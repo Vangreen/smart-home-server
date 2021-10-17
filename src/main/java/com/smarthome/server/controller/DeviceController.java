@@ -64,7 +64,6 @@ public class DeviceController {
 
     @MessageMapping("/updateDeviceStatus")
     public void updateDeviceStatus(@Payload DeviceConfigurationModel device) throws Exception {
-        System.out.println("XXXXXXXXXXXXXXXXXXXXX");
         deviceService.updateDeviceStatus(device.getSerial(), device.getDeviceType());
     }
 
