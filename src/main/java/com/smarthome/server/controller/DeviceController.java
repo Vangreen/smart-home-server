@@ -64,12 +64,13 @@ public class DeviceController {
 
     @MessageMapping("/updateDeviceStatus")
     public void updateDeviceStatus(@Payload DeviceConfigurationModel device) throws Exception {
+        System.out.println("XXXXXXXXXXXXXXXXXXXXX");
         deviceService.updateDeviceStatus(device.getSerial(), device.getDeviceType());
     }
 
     @MessageMapping("/changeDeviceStatus/{serial}")
-    public void changeDeviceStatus(@DestinationVariable("serial") int serial, @RequestBody DeviceConfigurationModel device) throws Exception {
-        deviceService.changeDeviceStatus(serial, device.getDeviceStatus());
+    public void changeDeviceStatus(@DestinationVariable("serial") int serial, @RequestBody String status) throws Exception {
+        deviceService.changeDeviceStatus(serial, status);
     }
 
     //Get mapping because of ios shortcuts app TODO fix in future
