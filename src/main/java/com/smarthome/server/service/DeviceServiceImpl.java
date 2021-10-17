@@ -39,26 +39,7 @@ public class DeviceServiceImpl implements DeviceService {
     public void changeStatus(int serial) {
         deviceRepository.findById(serial).ifPresent(device -> {
                     log.info("state change for device:" + serial);
-
-                    /*
-                     *  TODO Temporary fix
-                     *  In device code is bug
-                     *  Remove when fixed
-                     */
-                    if (device.getDeviceStatus().contains("\"")) {
-                        log.info("FIXME");
-                        if (device.getDeviceStatus().contains("Off")) {
-                            device.setDeviceStatus("Off");
-                        } else if (device.getDeviceStatus().contains("On")) {
-                            device.setDeviceStatus("On");
-                        }
-                    } else if (device.getDeviceStatus().contains("Off")) {
-                        device.setDeviceStatus("On");
-                    } else if (device.getDeviceStatus().contains("On")) {
-                        device.setDeviceStatus("Off");
-                    }
-
-                    saveAndSend(device);
+                    saveAndSend(setStatus(device));
                 }
         );
     }
@@ -119,8 +100,7 @@ public class DeviceServiceImpl implements DeviceService {
         log.info("state change for device:" + serial);
         deviceRepository.findBySerial(serial).map(deviceConfigurationModel -> {
                     sceneryService.validateSceneryByDeviceStatus(serial, status, null, deviceConfigurationModel.getRoomID());
-                    deviceConfigurationModel.setDeviceStatus(status);
-                    deviceRepository.save(deviceConfigurationModel);
+                    deviceRepository.save(setStatus(deviceConfigurationModel));
                     simpMessagingTemplate.convertAndSend("/device/device/" + serial, new StatusChangeResponse(status));
                     return true;
                 })
@@ -171,5 +151,26 @@ public class DeviceServiceImpl implements DeviceService {
         deviceRepository.save(device);
         simpMessagingTemplate.convertAndSend("/device/device/" + device.getSerial(), new StatusChangeResponse(device.getDeviceStatus()));
         log.info("Change by http device status:" + device.getSerial() + " to: " + device.getDeviceStatus());
+    }
+
+    /*
+     *  TODO Temporary fix
+     *  In device code is bug
+     *  Remove when fixed
+     */
+    private DeviceConfigurationModel setStatus(DeviceConfigurationModel device) {
+        if (device.getDeviceStatus().contains("\"")) {
+            log.info("FIXME");
+            if (device.getDeviceStatus().contains("Off")) {
+                device.setDeviceStatus("Off");
+            } else if (device.getDeviceStatus().contains("On")) {
+                device.setDeviceStatus("On");
+            }
+        } else if (device.getDeviceStatus().contains("Off")) {
+            device.setDeviceStatus("On");
+        } else if (device.getDeviceStatus().contains("On")) {
+            device.setDeviceStatus("Off");
+        }
+        return device;
     }
 }
