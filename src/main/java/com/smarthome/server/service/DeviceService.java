@@ -1,28 +1,28 @@
 package com.smarthome.server.service;
 
-import com.smarthome.server.entity.DeviceConfigurationModel;
-import com.smarthome.server.entity.Requests.RenameDeviceRequest;
-import com.smarthome.server.entity.UnassignedDeviceModel;
+import com.smarthome.server.entity.Device;
+import com.smarthome.server.entity.requests.RenameDeviceRequest;
+import com.smarthome.server.entity.UnassignedDevice;
 
 import java.util.List;
 
 public interface DeviceService {
 
-    List<UnassignedDeviceModel> findAll();
+    List<UnassignedDevice> findAll();
 
-    void addDevice(DeviceConfigurationModel deviceConfigurationModel);
+    void addDevice(Device device);
 
     void renameDevice(RenameDeviceRequest renameDeviceRequest);
 
     void deleteDevice(int serial);
 
-    void changeDeviceColor(int serial, DeviceConfigurationModel device) throws Exception;
+    void changeDeviceColor(int serial, Device device) throws Exception;
 
     void changeDeviceStatus(int serial, String status) throws Exception;
 
     void updateDeviceStatus(int serial, String status) throws Exception;
 
-    void doesntExist(int serial, String deviceType) throws Exception;
+    void createNewDevice(int serial, String deviceType) throws Exception;
 
     void changeStatus(int serial);
 

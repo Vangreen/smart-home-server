@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 @Data
-public class SceneryConfigurationModel {
+public class Scenery {
 
     @Id
     private int id;

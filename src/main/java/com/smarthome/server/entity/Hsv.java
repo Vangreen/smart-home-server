@@ -7,7 +7,7 @@ import lombok.Data;
 @Builder
 public class Hsv {
 
-    int hue;
-    int saturation;
-    int bright;
+    private int hue;
+    private int saturation;
+    private int bright;
 }

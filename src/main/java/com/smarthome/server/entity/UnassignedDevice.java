@@ -4,12 +4,12 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+
 @Document
 @Data
-public class RoomConfigurationModel {
+public class UnassignedDevice {
 
     @Id
-    private int id;
-    private String roomName;
-    private String main;
+    private int serial;
+    private String deviceType;
 }

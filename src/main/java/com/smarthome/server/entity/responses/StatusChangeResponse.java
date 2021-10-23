@@ -1,4 +1,4 @@
-package com.smarthome.server.entity.Responses;
+package com.smarthome.server.entity.responses;
 
 import lombok.Getter;
 import lombok.Setter;

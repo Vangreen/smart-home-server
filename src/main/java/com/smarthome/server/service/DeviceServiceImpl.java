@@ -1,17 +1,16 @@
 package com.smarthome.server.service;
 
-import com.smarthome.server.dao.DeviceRepository;
-import com.smarthome.server.dao.DeviceSceneryRepository;
-import com.smarthome.server.dao.UnassignedDeviceRepository;
-import com.smarthome.server.entity.DeviceConfigurationModel;
-import com.smarthome.server.entity.Requests.RenameDeviceRequest;
-import com.smarthome.server.entity.Responses.ColorChangeResponse;
-import com.smarthome.server.entity.Responses.SimpleResponse;
-import com.smarthome.server.entity.Responses.StatusChangeResponse;
-import com.smarthome.server.entity.UnassignedDeviceModel;
+import com.smarthome.server.entity.Device;
+import com.smarthome.server.entity.requests.RenameDeviceRequest;
+import com.smarthome.server.entity.responses.ColorChangeResponse;
+import com.smarthome.server.entity.responses.SimpleResponse;
+import com.smarthome.server.entity.responses.StatusChangeResponse;
+import com.smarthome.server.entity.UnassignedDevice;
 import com.smarthome.server.exception.ChangeColorException;
 import com.smarthome.server.exception.ChangeDeviceStatusException;
-import com.smarthome.server.scheduler.ScheduleDelayTask;
+import com.smarthome.server.repository.DeviceRepository;
+import com.smarthome.server.repository.UnassignedDeviceRepository;
+import com.smarthome.server.scheduler.RemoveUnassignedDevicesScheduler;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -27,11 +26,9 @@ public class DeviceServiceImpl implements DeviceService {
     private DeviceRepository deviceRepository;
     private UnassignedDeviceRepository unassignedDeviceRepository;
     private SimpMessagingTemplate simpMessagingTemplate;
-    private ScheduleDelayTask scheduleDelayTask;
-    private SceneryService sceneryService;
-    private DeviceSceneryRepository deviceSceneryRepository;
+    private RemoveUnassignedDevicesScheduler removeUnassignedDevicesScheduler;
 
-    public List<UnassignedDeviceModel> findAll() {
+    public List<UnassignedDevice> findAll() {
         return unassignedDeviceRepository.findAll();
     }
 
@@ -60,7 +57,7 @@ public class DeviceServiceImpl implements DeviceService {
                 .forEach(this::saveAndSend);
     }
 
-    public void addDevice(DeviceConfigurationModel device) {
+    public void addDevice(Device device) {
         int serial = device.getSerial();
 //        device.setDeviceConnectionStatus("connected");
         device.setHue(0);
@@ -80,7 +77,7 @@ public class DeviceServiceImpl implements DeviceService {
         });
     }
 
-    public void changeDeviceColor(int serial, DeviceConfigurationModel device) throws Exception {
+    public void changeDeviceColor(int serial, Device device) throws Exception {
         log.info("color change for device:" + serial);
         String status = device.getDeviceStatus();
         deviceRepository.findById(serial).map(deviceConfigurationModel -> {
@@ -100,7 +97,6 @@ public class DeviceServiceImpl implements DeviceService {
         log.info("state change for device:" + serial);
         deviceRepository.findBySerial(serial).map(device -> {
             setStatus(device);
-            sceneryService.validateSceneryByDeviceStatus(serial, status, null, device.getRoomID());
             saveAndSend(device);
             return device;
         }).orElseThrow(() -> new ChangeDeviceStatusException("Change device error"));
@@ -111,7 +107,6 @@ public class DeviceServiceImpl implements DeviceService {
     public void updateDeviceStatus(int serial, String status) throws Exception {
         log.info("state change for device:" + serial);
         deviceRepository.findById(serial).map(deviceConfigurationModel -> {
-                    sceneryService.validateSceneryByDeviceStatus(serial, status, null, deviceConfigurationModel.getRoomID());
                     deviceConfigurationModel.setDeviceStatus(status);
                     deviceRepository.save(deviceConfigurationModel);
                     return true;
@@ -120,13 +115,13 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
 
-    public void doesntExist(int serial, String deviceType) {
-        UnassignedDeviceModel unassignedDeviceModel = new UnassignedDeviceModel();
-        unassignedDeviceModel.setSerial(serial);
-        unassignedDeviceModel.setDeviceType(deviceType);
-        unassignedDeviceRepository.save(unassignedDeviceModel);
+    public void createNewDevice(int serial, String deviceType) {
+        UnassignedDevice unassignedDevice = new UnassignedDevice();
+        unassignedDevice.setSerial(serial);
+        unassignedDevice.setDeviceType(deviceType);
+        unassignedDeviceRepository.save(unassignedDevice);
         simpMessagingTemplate.convertAndSend("/device/unassignedDevices", unassignedDeviceRepository.findAll());
-        scheduleDelayTask.deleteUnassignedDevices(serial);
+        removeUnassignedDevicesScheduler.deleteUnassignedDevices(serial);
         log.info("new unassigned device with serial:" + serial);
     }
 
@@ -143,11 +138,10 @@ public class DeviceServiceImpl implements DeviceService {
     public void deleteDevice(int serial) {
         deviceRepository.deleteBySerial(serial);
         log.info("deleted device with serial:" + serial);
-        deviceSceneryRepository.deleteDeviceConfigurationInSceneryModelsByDeviceSerialLike(serial);
         simpMessagingTemplate.convertAndSend("/device/device/" + serial, new SimpleResponse("doesnt exists"));
     }
 
-    private void saveAndSend(DeviceConfigurationModel device) {
+    private void saveAndSend(Device device) {
         deviceRepository.save(device);
         simpMessagingTemplate.convertAndSend("/device/device/" + device.getSerial(), new StatusChangeResponse(device.getDeviceStatus()));
         log.info("Change by http device status:" + device.getSerial() + " to: " + device.getDeviceStatus());
@@ -158,7 +152,7 @@ public class DeviceServiceImpl implements DeviceService {
      *  In device code is bug
      *  Remove when fixed
      */
-    private DeviceConfigurationModel setStatus(DeviceConfigurationModel device) {
+    private Device setStatus(Device device) {
         if (device.getDeviceStatus().contains("\"")) {
             log.info("FIXME");
             if (device.getDeviceStatus().contains("Off")) {
