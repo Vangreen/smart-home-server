@@ -1,4 +1,4 @@
-package com.smarthome.server;
+package com.smarthome.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smarthome.server.entity.Room;

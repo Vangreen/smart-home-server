@@ -1,4 +1,4 @@
-package com.smarthome.server;
+package com.smarthome.server.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,7 +42,7 @@ public class DeviceControllerTestsIT {
     private final static int ROOM_ID_3 = 333;
     private final static Device DEVICE_1 = Device.builder().serial(DEVICE_SERIAL_1).brightness(100).deviceStatus("On").roomID(ROOM_ID_1).build();
     private final static Device DEVICE_2 = Device.builder().serial(DEVICE_SERIAL_2).brightness(100).deviceStatus("On").roomID(ROOM_ID_2).build();
-    private final static Device DEVICE_3 = Device.builder().serial(DEVICE_SERIAL_5).brightness(100).deviceStatus("On").roomID(ROOM_ID_3).build();
+    private final static Device DEVICE_3 = Device.builder().serial(DEVICE_SERIAL_3).brightness(100).deviceStatus("On").roomID(ROOM_ID_3).build();
     private final static Device DEVICE_CHANGE_STATUS = Device.builder().serial(DEVICE_SERIAL_5).brightness(100).deviceStatus("On").roomID(ROOM_ID_3).build();
     private final static RenameDeviceRequest DEVICE_3_WITH_NAME = RenameDeviceRequest.builder().deviceSerial(DEVICE_SERIAL_3).newDeviceName("NAME").build();
     private final static Device DEVICE_TO_DELETE = Device.builder().serial(DEVICE_SERIAL_4).deviceName("NAME").build();
@@ -112,7 +112,7 @@ public class DeviceControllerTestsIT {
                 .andExpect(status().isOk());
 
         assertTrue(repository.findBySerial(DEVICE_CHANGE_STATUS.getSerial()).isPresent());
-        assertEquals(repository.findBySerial(DEVICE_CHANGE_STATUS.getSerial()).get().getDeviceName(), "Off");
+        assertEquals(repository.findBySerial(DEVICE_CHANGE_STATUS.getSerial()).get().getDeviceStatus(), "Off");
     }
 
     public static String asJsonString(final Object obj) {
