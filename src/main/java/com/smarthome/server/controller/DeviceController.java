@@ -1,8 +1,8 @@
 package com.smarthome.server.controller;
 
 import com.smarthome.server.entity.Device;
-import com.smarthome.server.entity.requests.RenameDeviceRequest;
 import com.smarthome.server.entity.UnassignedDevice;
+import com.smarthome.server.entity.requests.RenameDeviceRequest;
 import com.smarthome.server.repository.DeviceRepository;
 import com.smarthome.server.service.DeviceService;
 import lombok.AllArgsConstructor;
@@ -30,8 +30,13 @@ public class DeviceController {
      *  REST part
      */
 
-    @GetMapping(path = "/getDevices")
-    public List<Device> getAllDevices(@RequestParam int roomID) {
+    @GetMapping(path = "/findAllDevices")
+    public List<Device> findAll() {
+        return deviceRepository.findAll();
+    }
+
+    @GetMapping(path = "/getDeviceByRoomID")
+    public List<Device> getDeviceByRoomId(@RequestParam int roomID) {
         return deviceRepository.findByRoomID(roomID);
     }
 
