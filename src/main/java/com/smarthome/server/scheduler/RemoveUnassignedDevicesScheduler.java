@@ -2,8 +2,9 @@ package com.smarthome.server.scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.smarthome.server.dao.UnassignedDeviceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.smarthome.server.repository.UnassignedDeviceRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -12,19 +13,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class ScheduleDelayTask {
+@RequiredArgsConstructor
+@Log4j2
+public class RemoveUnassignedDevicesScheduler {
 
-    @Autowired
-    private ObjectMapper mapper;
+    private final UnassignedDeviceRepository unassignedDeviceRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final ObjectMapper mapper;
 
     ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-    private UnassignedDeviceRepository unassignedDeviceRepository;
-    private SimpMessagingTemplate simpMessagingTemplate;
-
-    public ScheduleDelayTask(UnassignedDeviceRepository unassignedDeviceRepository, SimpMessagingTemplate simpMessagingTemplate) {
-        this.unassignedDeviceRepository = unassignedDeviceRepository;
-        this.simpMessagingTemplate = simpMessagingTemplate;
-    }
 
     private void delay5minutes(Runnable task) {
         executorService.schedule(task, 5, TimeUnit.MINUTES);
@@ -32,9 +29,9 @@ public class ScheduleDelayTask {
 
     public void deleteUnassignedDevices(int serial) {
         Runnable task = () -> {
-            System.out.println("run");
+            log.info("run");
             unassignedDeviceRepository.findById(serial).ifPresent(device -> {
-                        System.out.println("wykonano");
+                        log.info("wykonano");
                         unassignedDeviceRepository.deleteById(device.getSerial());
                         simpMessagingTemplate.convertAndSend("/device/device/" + serial, responseObject("doesnt exists"));
                     }

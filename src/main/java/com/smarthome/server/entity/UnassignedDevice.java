@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 @Data
-public class UnassignedDeviceModel {
+public class UnassignedDevice {
 
     @Id
     private int serial;
