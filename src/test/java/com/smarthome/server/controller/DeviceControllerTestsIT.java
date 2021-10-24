@@ -44,7 +44,7 @@ public class DeviceControllerTestsIT {
     private final static Device DEVICE_2 = Device.builder().serial(DEVICE_SERIAL_2).brightness(100).deviceStatus("On").roomID(ROOM_ID_2).build();
     private final static Device DEVICE_3 = Device.builder().serial(DEVICE_SERIAL_3).brightness(100).deviceStatus("On").roomID(ROOM_ID_3).build();
     private final static Device DEVICE_CHANGE_STATUS = Device.builder().serial(DEVICE_SERIAL_5).brightness(100).deviceStatus("On").roomID(ROOM_ID_3).build();
-    private final static RenameDeviceRequest DEVICE_3_WITH_NAME = RenameDeviceRequest.builder().deviceSerial(DEVICE_SERIAL_3).newDeviceName("NAME").build();
+    private final static RenameDeviceRequest DEVICE_3_WITH_NAME = RenameDeviceRequest.builder().deviceSerial(DEVICE_SERIAL_2).newDeviceName("NAME").build();
     private final static Device DEVICE_TO_DELETE = Device.builder().serial(DEVICE_SERIAL_4).deviceName("NAME").build();
 
     @Autowired
@@ -91,8 +91,7 @@ public class DeviceControllerTestsIT {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        assertTrue(repository.findBySerial(DEVICE_SERIAL_3).isPresent());
-        assertEquals(repository.findBySerial(DEVICE_SERIAL_3).get().getDeviceName(), DEVICE_3_WITH_NAME.getNewDeviceName());
+        assertTrue(repository.findByDeviceName(DEVICE_3_WITH_NAME.getNewDeviceName()).isPresent());
     }
 
     @Test

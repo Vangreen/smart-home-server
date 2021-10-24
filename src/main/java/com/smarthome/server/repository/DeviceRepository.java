@@ -18,6 +18,9 @@ public interface DeviceRepository extends MongoRepository<Device, Integer> {
     @Query("{serial:?0}")
     Optional<Device> findBySerial(int serial);
 
+    @Query("{deviceName:?0}")
+    Optional<Device> findByDeviceName(String name);
+
     @Query(value="{serial:?0}", delete = true)
     void deleteBySerial(int serial);
 
